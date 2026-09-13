@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useGames } from "@/hooks/use-games";
 import type { GameSessionSubmit } from "../types/game.types";
+import { queueGameEvent } from "@/utils/syncQueue";
 
 const PENDING_KEY = "smritisetu_pending_game_sessions";
 
@@ -42,7 +43,7 @@ function clearPendingSessions(): void {
  * useGameSession — wraps the global useGames() hook.
  * Provides a `submitResult` function that:
  *   1. Submits to the backend via useGames().submitSession
- *   2. On failure, caches the result in localStorage for later sync
+ *   2. On failure, caches the result in localStorage & syncQueue for later sync
  *   3. On mount, attempts to flush any pending offline sessions
  */
 export function useGameSession() {
@@ -86,10 +87,25 @@ export function useGameSession() {
 
   /**
    * Submit a completed game result to the backend.
-   * Falls back to localStorage on network failure.
+   * Falls back to syncQueue & localStorage on network failure.
    */
   const submitResult = useCallback(
     async (data: GameSessionSubmit): Promise<{ success: boolean; offline: boolean }> => {
+      // If client is already detected offline, queue immediately without waiting for timeout
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        savePendingSession(data);
+        queueGameEvent({
+          game_type: data.gameType,
+          game_id: data.gameId,
+          score: data.score,
+          accuracy: data.accuracy,
+          duration_seconds: data.durationSeconds,
+          difficulty: data.difficulty,
+          metrics: data.metrics,
+        });
+        return { success: false, offline: true };
+      }
+
       // Attempt to flush pending sessions first (fire-and-forget)
       void flushPending();
 
@@ -106,8 +122,17 @@ export function useGameSession() {
         });
         return { success: true, offline: false };
       } catch {
-        // Cache locally for later sync
+        // Cache in unified sync queue and local pending sessions
         savePendingSession(data);
+        queueGameEvent({
+          game_type: data.gameType,
+          game_id: data.gameId,
+          score: data.score,
+          accuracy: data.accuracy,
+          duration_seconds: data.durationSeconds,
+          difficulty: data.difficulty,
+          metrics: data.metrics,
+        });
         return { success: false, offline: true };
       }
     },

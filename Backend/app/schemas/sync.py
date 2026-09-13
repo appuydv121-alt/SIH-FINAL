@@ -33,12 +33,32 @@ class SyncTaskEvent(BaseModel):
     completed_at: datetime | None = None
 
 
+class SyncMemoryEvent(BaseModel):
+    client_event_id: str
+    memory_id: UUID | None = None
+    title: str
+    category: str = "Family"
+    description: str
+    date_or_era: str | None = None
+    image_url: str | None = None
+    created_at: datetime | None = None
+
+
+class SyncVoiceEvent(BaseModel):
+    client_event_id: str
+    transcript: str
+    action_taken: str | None = None
+    timestamp: datetime | None = None
+
+
 class SyncBatchRequest(BaseModel):
     patient_id: UUID | None = None
     last_synced_at: datetime | None = None
     game_events: list[SyncGameEvent] = Field(default_factory=list)
     medication_events: list[SyncMedicationEvent] = Field(default_factory=list)
     task_events: list[SyncTaskEvent] = Field(default_factory=list)
+    memory_events: list[SyncMemoryEvent] = Field(default_factory=list)
+    voice_events: list[SyncVoiceEvent] = Field(default_factory=list)
 
 
 class SyncBatchResponse(BaseModel):
@@ -46,5 +66,8 @@ class SyncBatchResponse(BaseModel):
     synced_games: int
     synced_medications: int
     synced_tasks: int
+    synced_memories: int = 0
+    synced_voice_logs: int = 0
     conflicts: list[str] = Field(default_factory=list)
     server_timestamp: datetime
+

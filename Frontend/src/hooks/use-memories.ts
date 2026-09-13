@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { memoriesApi, MemoryItem, CreateMemoryRequest } from "../api/memories.api";
 import { useAuth } from "./use-auth";
+import { queueMemoryEvent } from "../utils/syncQueue";
 
 export function useMemories(customPatientId?: string) {
   const queryClient = useQueryClient();
@@ -19,13 +20,61 @@ export function useMemories(customPatientId?: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: CreateMemoryRequest) => {
-      if (customPatientId) {
-        return memoriesApi.createPatientMemory(customPatientId, data);
+    mutationFn: async (data: CreateMemoryRequest) => {
+      // Check offline first
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        queueMemoryEvent({
+          title: data.title,
+          category: data.category || "Family",
+          description: data.description,
+          date_or_era: data.date_or_era,
+          image_url: data.image_url,
+        });
+        const fakeItem: MemoryItem = {
+          id: "temp_" + Date.now(),
+          patient_id: patientId || "local",
+          title: data.title,
+          category: data.category || "Family",
+          description: data.description,
+          date_or_era: data.date_or_era || null,
+          image_url: data.image_url || null,
+          created_at: new Date().toISOString(),
+        };
+        return fakeItem;
       }
-      return memoriesApi.createMemory(data);
+
+      try {
+        if (customPatientId) {
+          return await memoriesApi.createPatientMemory(customPatientId, data);
+        }
+        return await memoriesApi.createMemory(data);
+      } catch (err) {
+        // Fallback to offline queue
+        queueMemoryEvent({
+          title: data.title,
+          category: data.category || "Family",
+          description: data.description,
+          date_or_era: data.date_or_era,
+          image_url: data.image_url,
+        });
+        const fakeItem: MemoryItem = {
+          id: "temp_" + Date.now(),
+          patient_id: patientId || "local",
+          title: data.title,
+          category: data.category || "Family",
+          description: data.description,
+          date_or_era: data.date_or_era || null,
+          image_url: data.image_url || null,
+          created_at: new Date().toISOString(),
+        };
+        return fakeItem;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (newItem) => {
+      queryClient.setQueryData<MemoryItem[]>(["memories", patientId], (old) => {
+        if (!old) return [newItem];
+        return [newItem, ...old];
+      });
       queryClient.invalidateQueries({ queryKey: ["memories"] });
     },
   });

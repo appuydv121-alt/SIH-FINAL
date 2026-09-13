@@ -426,3 +426,71 @@ export interface ApiError {
   errorCode?: string;
   details?: Array<{ field: string; message: string; type: string }>;
 }
+
+// ─── Offline Synchronization Types ──────────────────────────────────────────
+
+export interface SyncGameEvent {
+  client_event_id: string;
+  game_type: string;
+  game_id?: string;
+  score: number;
+  accuracy: number;
+  duration_seconds: number;
+  difficulty?: string;
+  metrics?: Record<string, any>;
+  completed_at?: string;
+}
+
+export interface SyncMedicationEvent {
+  client_event_id: string;
+  schedule_id: string;
+  taken_at?: string;
+  status?: string;
+  notes?: string;
+}
+
+export interface SyncTaskEvent {
+  client_event_id: string;
+  task_id: string;
+  completed_at?: string;
+}
+
+export interface SyncMemoryEvent {
+  client_event_id: string;
+  memory_id?: string;
+  title: string;
+  category?: string;
+  description: string;
+  date_or_era?: string;
+  image_url?: string;
+  created_at?: string;
+}
+
+export interface SyncVoiceEvent {
+  client_event_id: string;
+  transcript: string;
+  action_taken?: string;
+  timestamp?: string;
+}
+
+export interface SyncBatchRequest {
+  patient_id?: string;
+  last_synced_at?: string;
+  game_events?: SyncGameEvent[];
+  medication_events?: SyncMedicationEvent[];
+  task_events?: SyncTaskEvent[];
+  memory_events?: SyncMemoryEvent[];
+  voice_events?: SyncVoiceEvent[];
+}
+
+export interface SyncBatchResponse {
+  success: boolean;
+  synced_games: number;
+  synced_medications: number;
+  synced_tasks: number;
+  synced_memories: number;
+  synced_voice_logs: number;
+  conflicts: string[];
+  server_timestamp: string;
+}
+

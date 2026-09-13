@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { tasksApi } from "../api/tasks.api";
 import { useAuth } from "./use-auth";
+import { queueTaskEvent } from "../utils/syncQueue";
 import type { Task, TaskCreate } from "../types/api";
 
 export function useTasks(customPatientId?: string) {
@@ -21,7 +22,24 @@ export function useTasks(customPatientId?: string) {
   });
 
   const completeMutation = useMutation({
-    mutationFn: (taskId: string) => tasksApi.completeTask(taskId),
+    mutationFn: async (taskId: string) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        queueTaskEvent({
+          task_id: taskId,
+          completed_at: new Date().toISOString(),
+        });
+        return { id: taskId, status: "completed" };
+      }
+      try {
+        return await tasksApi.completeTask(taskId);
+      } catch (err) {
+        queueTaskEvent({
+          task_id: taskId,
+          completed_at: new Date().toISOString(),
+        });
+        return { id: taskId, status: "completed" };
+      }
+    },
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: ["tasks", "today", patientId] });
       const previousTasks = queryClient.getQueryData<Task[]>(["tasks", "today", patientId]);

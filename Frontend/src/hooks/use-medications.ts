@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { medicationsApi } from "../api/medications.api";
 import { prescriptionsApi } from "../api/prescriptions.api";
 import { useAuth } from "./use-auth";
+import { queueMedicationEvent } from "../utils/syncQueue";
 import type {
   MedicationSchedule,
   MedicationLog,
@@ -42,7 +43,7 @@ export function useMedications(customPatientId?: string) {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       logId,
       status,
       notes,
@@ -50,7 +51,28 @@ export function useMedications(customPatientId?: string) {
       logId: string;
       status: MedicationLogStatus;
       notes?: string;
-    }) => medicationsApi.updateLogStatus(logId, status, notes),
+    }) => {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        queueMedicationEvent({
+          schedule_id: logId,
+          status,
+          notes,
+          taken_at: status === "taken" ? new Date().toISOString() : undefined,
+        });
+        return { id: logId, status, notes };
+      }
+      try {
+        return await medicationsApi.updateLogStatus(logId, status, notes);
+      } catch (err) {
+        queueMedicationEvent({
+          schedule_id: logId,
+          status,
+          notes,
+          taken_at: status === "taken" ? new Date().toISOString() : undefined,
+        });
+        return { id: logId, status, notes };
+      }
+    },
     onMutate: async ({ logId, status }) => {
       await queryClient.cancelQueries({ queryKey: ["medications", "logs", "today", patientId] });
       const previousLogs = queryClient.getQueryData<MedicationLog[]>([

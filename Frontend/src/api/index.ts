@@ -11,3 +11,4 @@ export * from "./voice.api";
 export * from "./translation.api";
 export * from "./caretakers.api";
 export * from "./doctors.api";
+export * from "./sync.api";

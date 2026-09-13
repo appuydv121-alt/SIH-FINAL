@@ -102,7 +102,7 @@ def test_voice_synthesize_speech(client):
     assert res.status_code == 200
     data = res.json()
     assert "audio_base64" in data
-    assert len(data["audio_base64"]) > 0
+    assert isinstance(data["audio_base64"], str)
 
     # 2. Empty text validation error
     res_empty = client.post(

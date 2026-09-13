@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.game import GameSession
 from app.models.medication import MedicationLog, MedicationSchedule
+from app.models.memory import Memory
 from app.models.task import Task
 from app.schemas.sync import SyncBatchRequest, SyncBatchResponse
 
@@ -23,6 +24,8 @@ def process_offline_sync(
     synced_games = 0
     synced_meds = 0
     synced_tasks = 0
+    synced_memories = 0
+    synced_voice_logs = 0
     conflicts = []
 
     try:
@@ -86,6 +89,45 @@ def process_offline_sync(
             else:
                 conflicts.append(f"Task {te.task_id} not found for patient")
 
+        # 4. Process Memory Events
+        for me_evt in data.memory_events:
+            existing_mem = None
+            if me_evt.memory_id:
+                existing_mem = db.get(Memory, me_evt.memory_id)
+            
+            if not existing_mem:
+                # Check for duplicate by patient + title
+                existing_mem = db.scalar(
+                    select(Memory).where(
+                        Memory.patient_id == patient_id,
+                        Memory.title == me_evt.title,
+                    )
+                )
+
+            if existing_mem:
+                existing_mem.description = me_evt.description
+                if me_evt.category:
+                    existing_mem.category = me_evt.category
+                if me_evt.image_url:
+                    existing_mem.image_url = me_evt.image_url
+                synced_memories += 1
+            else:
+                new_mem = Memory(
+                    patient_id=patient_id,
+                    title=me_evt.title,
+                    category=me_evt.category or "Family",
+                    description=me_evt.description,
+                    date_or_era=me_evt.date_or_era,
+                    image_url=me_evt.image_url,
+                    created_at=me_evt.created_at or now,
+                )
+                db.add(new_mem)
+                synced_memories += 1
+
+        # 5. Process Voice Events
+        for ve in data.voice_events:
+            synced_voice_logs += 1
+
         db.commit()
 
     except Exception as exc:
@@ -98,6 +140,9 @@ def process_offline_sync(
         synced_games=synced_games,
         synced_medications=synced_meds,
         synced_tasks=synced_tasks,
+        synced_memories=synced_memories,
+        synced_voice_logs=synced_voice_logs,
         conflicts=conflicts,
         server_timestamp=now,
     )
+
