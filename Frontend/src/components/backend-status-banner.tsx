@@ -1,33 +1,15 @@
-import { useState, useEffect } from "react";
 import { AlertTriangle, RefreshCw, WifiOff, CloudUpload, Download } from "lucide-react";
-import { checkBackendHealth } from "../api/client";
+import { useConnectionStatus } from "../hooks/use-connection-status";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { usePWA } from "../hooks/use-pwa";
 
 export function BackendStatusBanner() {
-  const [backendOk, setBackendOk] = useState<boolean | null>(null);
-  const [isChecking, setIsChecking] = useState<boolean>(false);
-  const [statusMessage, setStatusMessage] = useState<string>("");
-
-  const { isOnline, isSyncing, pendingCount, syncNow } = useOfflineSync();
+  const { deviceOnline, backendReachable, isChecking, checkNow } = useConnectionStatus();
+  const { isSyncing, pendingCount, syncNow } = useOfflineSync();
   const { isInstallable, promptInstall } = usePWA();
 
-  const checkStatus = async () => {
-    setIsChecking(true);
-    const health = await checkBackendHealth();
-    setBackendOk(health.ok);
-    setStatusMessage(health.message);
-    setIsChecking(false);
-  };
-
-  useEffect(() => {
-    checkStatus();
-    const interval = setInterval(checkStatus, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Condition 1: Device is completely offline
-  if (!isOnline) {
+  // State 1: Device is genuinely offline (no internet / WiFi / Cellular)
+  if (!deviceOnline) {
     return (
       <aside
         aria-label="Offline status"
@@ -60,7 +42,37 @@ export function BackendStatusBanner() {
     );
   }
 
-  // Condition 2: Online with pending offline items ready to sync
+  // State 2: Device has internet, but backend API is unreachable
+  if (!backendReachable) {
+    return (
+      <aside
+        aria-label="Backend status"
+        className="w-full bg-orange-950/80 border-b border-orange-600/50 text-cream px-4 py-2.5 text-xs sm:text-sm font-medium transition-all shadow-sm backdrop-blur-md"
+      >
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={16} className="text-orange-400 shrink-0" />
+            <span>
+              <strong>Having trouble reaching the server:</strong> Your changes are saved and will sync automatically.
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={checkNow}
+              disabled={isChecking}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface border border-clay text-cream hover:bg-clay text-xs font-bold transition disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={isChecking ? "animate-spin text-sun" : "text-sun"} />
+              {isChecking ? "Checking…" : "Retry"}
+            </button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // State 3: Device is online, server is reachable, and we have offline changes queued
   if (pendingCount > 0) {
     return (
       <aside
@@ -90,41 +102,7 @@ export function BackendStatusBanner() {
     );
   }
 
-  // Condition 3: Backend service is unreachable while client is online
-  if (backendOk === false) {
-    return (
-      <aside
-        aria-label="Backend status"
-        className="w-full bg-fire/20 border-b border-fire/50 text-cream px-4 py-2.5 text-xs sm:text-sm font-medium transition-all"
-      >
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <AlertTriangle size={16} className="text-fire shrink-0" />
-            <span>
-              <strong>SmritiSetu Server Offline:</strong> Unable to connect to backend service.{" "}
-              <span className="opacity-80">({statusMessage || "Connection refused"})</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] opacity-75 hidden sm:inline">
-              Running in offline resilience mode
-            </span>
-            <button
-              type="button"
-              onClick={checkStatus}
-              disabled={isChecking}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface border border-clay text-cream hover:bg-clay text-xs font-bold transition disabled:opacity-50"
-            >
-              <RefreshCw size={12} className={isChecking ? "animate-spin text-sun" : "text-sun"} />
-              {isChecking ? "Checking…" : "Retry"}
-            </button>
-          </div>
-        </div>
-      </aside>
-    );
-  }
-
-  // Condition 4: Everything connected, optional install prompt pill
+  // State 4: Optional install banner if app is installable PWA
   if (isInstallable) {
     return (
       <aside
@@ -149,5 +127,6 @@ export function BackendStatusBanner() {
     );
   }
 
+  // State 5: Everything is healthy and connected -> No banner
   return null;
 }

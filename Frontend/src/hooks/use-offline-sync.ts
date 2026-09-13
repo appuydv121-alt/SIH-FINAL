@@ -11,9 +11,12 @@ import type { SyncBatchResponse } from "../types/api";
 
 export function useOfflineSync(patientId?: string) {
   const queryClient = useQueryClient();
-  const [isOnline, setIsOnline] = useState<boolean>(
-    typeof navigator !== "undefined" ? navigator.onLine : true,
-  );
+  const [isOnline, setIsOnline] = useState<boolean>(() => {
+    if (typeof window !== "undefined" && typeof navigator !== "undefined") {
+      return typeof navigator.onLine === "boolean" ? navigator.onLine : true;
+    }
+    return true;
+  });
   const [pendingCount, setPendingCount] = useState<number>(getPendingCount());
   const [lastSyncedAt, setLastSyncedState] = useState<string | null>(getLastSyncedAt());
   const [isSyncing, setIsSyncing] = useState<boolean>(false);

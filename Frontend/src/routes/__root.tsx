@@ -51,7 +51,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <BackendStatusBanner />
       <div className="max-w-md text-center py-12">
         <h1 className="text-2xl font-bold tracking-tight text-cream">Unable to display page</h1>
         <div className="mt-4 rounded-xl border border-fire/50 bg-fire/15 p-4 text-sm text-cream text-left">

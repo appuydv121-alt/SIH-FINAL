@@ -607,7 +607,7 @@ export function getTranslation(
   key: string,
   params?: Record<string, string | number>,
 ): string {
-  const short = langCode.slice(0, 2).toLowerCase();
+  const short = (langCode.includes("-") ? langCode.split("-")[0] : langCode).toLowerCase();
   const langDict = TRANSLATIONS[short] || TRANSLATIONS.en;
   const raw = langDict[key] || TRANSLATIONS.en[key] || key;
   return formatString(raw, params);

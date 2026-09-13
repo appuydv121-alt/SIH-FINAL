@@ -81,7 +81,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [user?.preferred_language]);
 
-  const shortLang = language.slice(0, 2);
+  const shortLang = (language.includes("-") ? language.split("-")[0] : language).toLowerCase();
 
   const setLanguage = useCallback(
     async (code: VoiceLanguageCode) => {

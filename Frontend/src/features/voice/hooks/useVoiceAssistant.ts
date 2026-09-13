@@ -2,8 +2,53 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import type { VoiceLanguageCode, VoiceStatusState, InterpretResult } from "../types/voice.types";
 import { voiceApi } from "../services/voiceApi";
+
+export const VOICE_LOCALE_MAP: Record<
+  VoiceLanguageCode,
+  {
+    sttLocale: string;
+    fallbackStt: string;
+    ttsLocale: string;
+    fallbackTts: string;
+    note?: string;
+  }
+> = {
+  "en-IN": { sttLocale: "en-IN", fallbackStt: "en-US", ttsLocale: "en-IN", fallbackTts: "en-US" },
+  "hi-IN": { sttLocale: "hi-IN", fallbackStt: "en-IN", ttsLocale: "hi-IN", fallbackTts: "en-IN" },
+  "te-IN": { sttLocale: "te-IN", fallbackStt: "en-IN", ttsLocale: "te-IN", fallbackTts: "en-IN" },
+  "ta-IN": { sttLocale: "ta-IN", fallbackStt: "en-IN", ttsLocale: "ta-IN", fallbackTts: "en-IN" },
+  "mr-IN": { sttLocale: "mr-IN", fallbackStt: "hi-IN", ttsLocale: "mr-IN", fallbackTts: "hi-IN" },
+  "gu-IN": { sttLocale: "gu-IN", fallbackStt: "hi-IN", ttsLocale: "gu-IN", fallbackTts: "hi-IN" },
+  "bn-IN": { sttLocale: "bn-IN", fallbackStt: "en-IN", ttsLocale: "bn-IN", fallbackTts: "en-IN" },
+  "as-IN": {
+    sttLocale: "as-IN",
+    fallbackStt: "bn-IN",
+    ttsLocale: "as-IN",
+    fallbackTts: "bn-IN",
+    note: "Assamese voice recognition falls back to Indic/English if unsupported by browser",
+  },
+  "ne-IN": { sttLocale: "ne-NP", fallbackStt: "hi-IN", ttsLocale: "ne-NP", fallbackTts: "hi-IN" },
+  "mni-IN": {
+    sttLocale: "mni-IN",
+    fallbackStt: "hi-IN",
+    ttsLocale: "mni-IN",
+    fallbackTts: "hi-IN",
+    note: "Manipuri falls back to Indic/English speech if unsupported by browser",
+  },
+  "brx-IN": {
+    sttLocale: "brx-IN",
+    fallbackStt: "hi-IN",
+    ttsLocale: "brx-IN",
+    fallbackTts: "hi-IN",
+    note: "Bodo falls back to Hindi/English speech if unsupported by browser",
+  },
+  "kn-IN": { sttLocale: "kn-IN", fallbackStt: "en-IN", ttsLocale: "kn-IN", fallbackTts: "en-IN" },
+  "ml-IN": { sttLocale: "ml-IN", fallbackStt: "en-IN", ttsLocale: "ml-IN", fallbackTts: "en-IN" },
+  "pa-IN": { sttLocale: "pa-IN", fallbackStt: "hi-IN", ttsLocale: "pa-IN", fallbackTts: "hi-IN" },
+};
 
 const ENTITY_ROUTE_MAP: Record<string, string> = {
   WATER_JUGS: "/games/water-jugs",
@@ -90,11 +135,21 @@ const ENTITY_NAME_MAP: Record<string, Record<string, string>> = {
 };
 
 export function useVoiceAssistant(
-  initialLanguage: VoiceLanguageCode = "en-IN",
+  initialLanguage?: VoiceLanguageCode,
   onAutoClose?: () => void,
 ) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { language: contextLanguage, setLanguage: setGlobalLanguage } = useLanguage();
+
+  // Single source of truth from LanguageContext
+  const language = contextLanguage || initialLanguage || "en-IN";
+  const setLanguage = useCallback(
+    (newLang: VoiceLanguageCode) => {
+      setGlobalLanguage(newLang);
+    },
+    [setGlobalLanguage],
+  );
 
   const onAutoCloseRef = useRef(onAutoClose);
   useEffect(() => {
@@ -114,7 +169,6 @@ export function useVoiceAssistant(
     }, delay);
   }, []);
 
-  const [language, setLanguage] = useState<VoiceLanguageCode>(initialLanguage);
   const [status, setStatus] = useState<VoiceStatusState>("idle");
   const [statusMessage, setStatusMessage] = useState<string>(
     "Ready to listen. Tap the microphone.",
@@ -134,7 +188,7 @@ export function useVoiceAssistant(
   const chunksRef = useRef<Blob[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const shortLang = language.slice(0, 2);
+  const shortLang = (language.includes("-") ? language.split("-")[0] : language).toLowerCase();
 
   const speak = useCallback(
     async (text: string) => {
@@ -175,7 +229,6 @@ export function useVoiceAssistant(
             const finish = () => {
               if (isDone) return;
               isDone = true;
-              URL.revokeObjectURL(url);
               if (currentAudioRef.current === audio) {
                 currentAudioRef.current = null;
               }
@@ -206,15 +259,26 @@ export function useVoiceAssistant(
         try {
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = language;
+          const localeConfig = VOICE_LOCALE_MAP[language] || {
+            ttsLocale: language,
+            fallbackTts: "en-IN",
+          };
+          utterance.lang = localeConfig.ttsLocale;
           utterance.rate = 0.92;
 
           const voices = window.speechSynthesis.getVoices();
           if (voices && voices.length > 0) {
+            const targetLang = localeConfig.ttsLocale.toLowerCase();
+            const fallbackLang = localeConfig.fallbackTts.toLowerCase();
             const langPrefix = language.slice(0, 2).toLowerCase();
+
             const matchedVoice =
-              voices.find((v) => v.lang.toLowerCase() === language.toLowerCase()) ||
-              voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix));
+              voices.find((v) => v.lang.toLowerCase() === targetLang) ||
+              voices.find((v) => v.lang.toLowerCase() === fallbackLang) ||
+              voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix)) ||
+              voices.find((v) => v.lang.toLowerCase().startsWith("hi")) ||
+              voices.find((v) => v.lang.toLowerCase().startsWith("en"));
+
             if (matchedVoice) {
               utterance.voice = matchedVoice;
             }
@@ -249,6 +313,113 @@ export function useVoiceAssistant(
     [language],
   );
 
+const VOICE_PROMPTS: Record<string, Record<string, string>> = {
+  OPEN_GAMES: {
+    hi: "गेम्स ट्रेनिंग सेंटर खोल रहा हूँ।",
+    te: "మెదడు ఆటల కేంద్రాన్ని తెరుస్తున్నాను.",
+    ta: "மூளை பயிற்சி விளையாட்டுகள் திறக்கப்படுகிறது.",
+    mr: "ब्रेन गेम्स केंद्र उघडत आहे.",
+    gu: "મગજની રમતોનું કેન્દ્ર ખોલી રહ્યો છું.",
+    bn: "গেম সেন্টার খুলছি।",
+    as: "খেলসমূহ কেন্দ্ৰ খুলি আছোঁ।",
+    ne: "खेल केन्द्र खोल्दैछु।",
+    mni: "ৱাখলগী খেল কেন্দ্র হাংদোক্লি।",
+    brx: "गेमफोरनि थावनि खेवबाय।",
+    en: "Opening Cognitive Training Centre with 22 exercises.",
+  },
+  OPEN_PROGRESS: {
+    hi: "एआई कॉग्निटिव एनालिटिक्स और प्रोग्रेस रिपोर्ट खोल रहा हूँ।",
+    te: "మీ ప్రగతి నివేదిక తెరుస్తున్నాను.",
+    ta: "உங்கள் முன்னேற்ற அறிக்கை திறக்கப்படுகிறது.",
+    mr: "तुमचा प्रगती अहवाल उघडत आहे.",
+    gu: "તમારો પ્રગતિ અહેવાલ ખોલી રહ્યો છું.",
+    bn: "কগনিটিভ অ্যানালিটিক্স রিপোর্ট খুলছি।",
+    as: "প্ৰগতি আৰু এনালাইটিক্স ৰিপোৰ্ট খুলি আছোঁ।",
+    ne: "तपाईंको प्रगति विवरण खोल्दैछु।",
+    mni: "নহাক্কী চাউখৎপগী ৱাফম হাংদোক্লি।",
+    brx: "नोंथांनि दावगानाय दिन्थिबाय।",
+    en: "Opening AI Cognitive Analytics dashboard.",
+  },
+  OPEN_MEMORIES: {
+    hi: "पारिवारिक यादें और एल्बम खोल रहा हूँ।",
+    te: "మీ జ్ఞాపకాల గ్యాలరీని తెరుస్తున్నాను.",
+    ta: "உங்கள் நினைவுகள் கேலரி திறக்கப்படுகிறது.",
+    mr: "तुमचा आठवणींचा संग्रह उघडत आहे.",
+    gu: "તમારો સ્મૃતિઓનો સંગ્રહ ખોલી રહ્યો છું.",
+    bn: "স্মৃতি ও অ্যালবাম খুলছি।",
+    as: "স্মৃতি আৰু ফটো এলবাম খুলি আছোঁ।",
+    ne: "तपाईंका सम्झनाहरू खोल्दैछु।",
+    mni: "নহাক্কী নীংশিংবা হাংদোক্লি।",
+    brx: "नोंथांनि गोसोखांथि खेवबाय।",
+    en: "Opening your family memories album.",
+  },
+  DEFAULT_ROUTINE: {
+    hi: "आज के रिमाइंडर और दवा का शेड्यूल खोल रहा हूँ।",
+    te: "నేటి దినచర్య మరియు మందుల వివరాలు తెరుస్తున్నాను.",
+    ta: "இன்றைய நினைவூட்டல்கள் மற்றும் மருந்துகள் திறக்கப்படுகிறது.",
+    mr: "आजचे रिमाइंडर्स आणि औषधांचे वेळापत्रक उघडत आहे.",
+    gu: "આજના રિમાઇન્ડર્સ અને દવાઓનું શેડ્યૂલ ખોલી રહ્યો છું.",
+    bn: "আজকের রিমাইন্ডার ও ওষুধ তালিকা খুলছি।",
+    as: "আজিৰ সোঁৱৰণী আৰু ঔষধ তালিকা খুলি আছোঁ।",
+    ne: "आजका रिमाइन्डर र औषधि तालिका खोल्दैछु।",
+    mni: "ঙসিগী থবক অমসুং হিদাক্কী মতৌ হাংদোক্লি।",
+    brx: "दिनैनि खामानि आरो मुलिनी सम खेवबाय।",
+    en: "Opening your schedule and medication reminders.",
+  },
+  HELP: {
+    hi: "आप कह सकते हैं: गेम खेलो, वॉटर जग खोलो, मेरे रिमाइंडर दिखाओ, या प्रोग्रेस दिखाओ।",
+    te: "మీరు చెప్పవచ్చు: ఆటలు ఆడు, మందులు చూపించు, లేదా నా ప్రగతి చూపించు.",
+    ta: "நீங்கள் சொல்லலாம்: விளையாட்டு விளையாடு, மருந்துகளைக் காட்டு, அல்லது முன்னேற்றத்தைக் காட்டு.",
+    mr: "तुम्ही म्हणू शकता: खेळ खेळा, औषधे दाखवा, किंवा प्रगती दाखवा.",
+    gu: "તમે કહી શકો છો: રમત રમો, દવાઓ બતાવો, અથવા પ્રગતિ બતાવો.",
+    bn: "আপনি বলতে পারেন: গেম খেলুন, ওষুধ দেখান, বা প্রোগ্রেস দেখান।",
+    as: "আপুনি ক'ব পাৰে: খেল খোলক, সোঁৱৰণী দেখুওৱা, বা প্ৰগতি দেখুওৱা।",
+    ne: "तपाईं भन्न सक्नुहुन्छ: खेल खेल्नुहोस्, औषधि देखाउनुहोस्, वा प्रगति देखाउनुहोस्।",
+    mni: "নহাক্না হায়বা য়াগনি: খেল শানৌ, হিদাক উৎলু, নত্রগা চাউখৎপা উৎলু।",
+    brx: "नोंथां बुंनो हागौ: गेले, मुली दिन्थि, एबा दावगानाय दिन्थि।",
+    en: "You can say: play games, open water jugs, show my reminders, or show my progress.",
+  },
+  UNKNOWN: {
+    hi: "क्षमा करें, मैं समझ नहीं पाया। आप 'गेम खेलो' या 'रिमाइंडर दिखाओ' कह सकते हैं।",
+    te: "క్షమించండి, అర్థం కాలేదు. 'ఆటలు ఆడు' లేదా 'రిమైండర్లు చూపించు' అని చెప్పండి.",
+    ta: "மன்னிக்கவும், புரியவில்லை. 'விளையாடு' அல்லது 'நினைவூட்டல் காட்டு' என்று சொல்லுங்கள்.",
+    mr: "क्षमस्व, मला समजले नाही. तुम्ही 'खेळ खेळा' किंवा 'रिमाइंडर्स दाखवा' म्हणू शकता.",
+    gu: "માફ કરશો, સમજાયું નથી. તમે 'રમત રમો' અથવા 'રિમાઇન્ડર બતાવો' કહી શકો છો.",
+    bn: "বুঝতে পারিনি। 'গেম খেলুন' বা 'রিমাইন্ডার দেখান' বলতে পারেন।",
+    as: "মই বুজি নাপালোঁ। 'খেল খোলক' বা 'সোঁৱৰণী দেখুওৱা' বুলি ক'ব পাৰে।",
+    ne: "माफ गर्नुहोस्, बुझिन। 'खेल खेल्नुहोस्' वा 'रिमाइन्डर देखाउनुहोस्' भन्नुहोस्।",
+    mni: "ঙাকপীয়ু, খংবা ঙমদে। 'খেল শানৌ' নত্রগা 'থবক উৎলু' হায়বীয়ু।",
+    brx: "निमाहा बिनो, बुजियाखै। 'गेले' एबा 'खामानि दिन्थि' बुं।",
+    en: "I didn't quite catch that. Try saying 'play games' or 'show my reminders'.",
+  },
+  OPEN_CAREGIVER: {
+    hi: "केयरगिवर मॉनिटरिंग डैशबोर्ड खोल रहा हूँ।",
+    te: "సంరక్షకుల పర్యవేక్షణ డ్యాష్‌బోర్డ్ తెరుస్తున్నాను.",
+    ta: "பராமரிப்பாளர் கண்காணிப்பு பலகை திறக்கப்படுகிறது.",
+    mr: "केअरगिव्हर डॅशबोर्ड उघडत आहे.",
+    gu: "સંભાળ રાખનાર ડેશબોર્ડ ખોલી રહ્યો છું.",
+    bn: "কেয়ারগিভার ড্যাশবোর্ড খুলছি।",
+    as: "কেয়াৰগিভাৰ ডেচবৰ্ড খুলি আছোঁ।",
+    ne: "हेरचाहकर्ता ड्यासबोर्ड खोल्दैछु।",
+    mni: "কেয়ারগিভার ড্যাশবোর্ড হাংদোক্লি।",
+    brx: "केयारगिभार डेशबोर्ड खेवबाय।",
+    en: "Opening Caregiver monitoring dashboard.",
+  },
+  NO_PENDING_TASKS: {
+    hi: "आज के लिए आपका कोई और बाकी काम नहीं है।",
+    te: "ఈ రోజుకి మీకు ఇకపై పెండింగ్ పనులు ఏవీ లేవు.",
+    ta: "இன்று உங்களுக்கு வேறு நிலுவையில் உள்ள பணிகள் எதுவும் இல்லை.",
+    mr: "आज तुमच्यासाठी कोणतेही प्रलंबित काम उरलेले नाही.",
+    gu: "આજે તમારા માટે કોઈ બાકી કાર્યો નથી.",
+    bn: "আজকের জন্য আপনার আর কোনো বকেয়া কাজ নেই।",
+    as: "আজিলৈ আপোনাৰ কোনো বাকী থকা কাম নাই।",
+    ne: "आजको लागि तपाईंको कुनै बाँकी काम छैन।",
+    mni: "ঙসিগীদমক অতোপ্পা থবক লৈতরে।",
+    brx: "दिनैनि थाखाय आरो खामानि गैया।",
+    en: "You have no more pending tasks scheduled for today.",
+  },
+};
+
   const executeCommand = useCallback(
     async (result: InterpretResult) => {
       setLastIntent(result);
@@ -257,15 +428,8 @@ export function useVoiceAssistant(
       switch (result.intent) {
         case "OPEN_GAMES": {
           const resp =
-            l === "hi"
-              ? "गेम्स ट्रेनिंग सेंटर खोल रहा हूँ।"
-              : l === "as"
-                ? "খেলসমূহ কেন্দ্ৰ খুলি আছোঁ।"
-                : l === "bn"
-                  ? "গেম সেন্টার খুলছি।"
-                  : l === "ne"
-                    ? "खेल केन्द्र खोल्दैछु।"
-                    : "Opening Cognitive Training Centre with 22 exercises.";
+            VOICE_PROMPTS.OPEN_GAMES[l] ||
+            VOICE_PROMPTS.OPEN_GAMES.en;
           setLastResponse(resp);
           setStatusMessage(resp);
           navigate({ to: "/games" });
@@ -336,22 +500,16 @@ export function useVoiceAssistant(
               resp = dict.dictation;
             } else {
               resp =
-                l === "hi"
-                  ? "आज के रिमाइंडर और दवा का शेड्यूल खोल रहा हूँ।"
-                  : l === "as"
-                    ? "আজিৰ সোঁৱৰণী আৰু ঔষধ তালিকা খুলি আছোঁ।"
-                    : l === "bn"
-                      ? "আজকের রিমাইন্ডার ও ওষুধ তালিকা খুলছি।"
-                      : "Opening your schedule and medication reminders.";
+                VOICE_PROMPTS.DEFAULT_ROUTINE[l] ||
+                VOICE_PROMPTS.DEFAULT_ROUTINE.en;
             }
             setLastResponse(resp);
             setStatusMessage(resp);
             await speak(resp);
           } catch {
             const fallbackResp =
-              l === "hi"
-                ? "आज के रिमाइंडर और दवा का शेड्यूल खोल दिया गया है।"
-                : "Your daily reminders schedule has been opened.";
+              VOICE_PROMPTS.DEFAULT_ROUTINE[l] ||
+              VOICE_PROMPTS.DEFAULT_ROUTINE.en;
             setLastResponse(fallbackResp);
             setStatusMessage(fallbackResp);
             await speak(fallbackResp);
@@ -380,32 +538,16 @@ export function useVoiceAssistant(
                         : `Your next reminder is ${t.title} scheduled at ${t.time}.`;
             } else {
               resp =
-                l === "hi"
-                  ? "आज के लिए आपका कोई और बाकी काम नहीं है।"
-                  : l === "as"
-                    ? "আজিলৈ আপোনাৰ কোনো বাকী থকা কাম নাই।"
-                    : l === "bn"
-                      ? "আজকের জন্য আপনার আর কোনো বকেয়া কাজ নেই।"
-                      : l === "ne"
-                        ? "आजको लागि तपाईंको कुनै बाँकी काम छैन।"
-                        : l === "te"
-                          ? "ఈ రోజుకి మీకు ఇకపై పెండింగ్ పనులు ఏవీ లేవు."
-                          : l === "ta"
-                            ? "இன்று உங்களுக்கு வேறு நிலுவையில் உள்ள பணிகள் எதுவும் இல்லை."
-                            : l === "mr"
-                              ? "आज तुमच्यासाठी कोणतेही प्रलंबित काम उरलेले नाही."
-                              : l === "gu"
-                                ? "આજે તમારા માટે કોઈ બાકી કાર્યો નથી."
-                                : "You have no more pending tasks scheduled for today.";
+                VOICE_PROMPTS.NO_PENDING_TASKS[l] ||
+                VOICE_PROMPTS.NO_PENDING_TASKS.en;
             }
             setLastResponse(resp);
             setStatusMessage(resp);
             await speak(resp);
           } catch {
             const resp =
-              l === "hi"
-                ? "आज के लिए आपका कोई और बाकी काम नहीं है।"
-                : "You have no more pending tasks scheduled for today.";
+              VOICE_PROMPTS.NO_PENDING_TASKS[l] ||
+              VOICE_PROMPTS.NO_PENDING_TASKS.en;
             setLastResponse(resp);
             setStatusMessage(resp);
             await speak(resp);
@@ -415,13 +557,8 @@ export function useVoiceAssistant(
 
         case "OPEN_PROGRESS": {
           const resp =
-            l === "hi"
-              ? "एआई कॉग्निटिव एनालिटिक्स और प्रोग्रेस रिपोर्ट खोल रहा हूँ।"
-              : l === "as"
-                ? "প্ৰগতি আৰু এনালাইটিক্স ৰিপোৰ্ট খুলি আছোঁ।"
-                : l === "bn"
-                  ? "কগনিটিভ অ্যানালিটিক্স রিপোর্ট খুলছি।"
-                  : "Opening AI Cognitive Analytics dashboard.";
+            VOICE_PROMPTS.OPEN_PROGRESS[l] ||
+            VOICE_PROMPTS.OPEN_PROGRESS.en;
           setLastResponse(resp);
           setStatusMessage(resp);
           navigate({ to: "/analytics" });
@@ -432,13 +569,8 @@ export function useVoiceAssistant(
 
         case "OPEN_MEMORIES": {
           const resp =
-            l === "hi"
-              ? "पारिवारिक यादें और एल्बम खोल रहा हूँ।"
-              : l === "as"
-                ? "স্মৃতি আৰু ফটো এলবাম খুলি আছোঁ।"
-                : l === "bn"
-                  ? "স্মৃতি ও অ্যালবাম খুলছি।"
-                  : "Opening your family memories album.";
+            VOICE_PROMPTS.OPEN_MEMORIES[l] ||
+            VOICE_PROMPTS.OPEN_MEMORIES.en;
           setLastResponse(resp);
           setStatusMessage(resp);
           navigate({ to: "/memories" });
@@ -450,9 +582,8 @@ export function useVoiceAssistant(
         case "OPEN_CAREGIVER": {
           if (user?.role === "caretaker" || user?.role === "doctor") {
             const resp =
-              l === "hi"
-                ? "केयरगिवर मॉनिटरिंग डैशबोर्ड खोल रहा हूँ।"
-                : "Opening Caregiver monitoring dashboard.";
+              VOICE_PROMPTS.OPEN_CAREGIVER[l] ||
+              VOICE_PROMPTS.OPEN_CAREGIVER.en;
             setLastResponse(resp);
             setStatusMessage(resp);
             navigate({ to: "/caregiver" });
@@ -473,13 +604,8 @@ export function useVoiceAssistant(
         case "HELP": {
           setShowHelp(true);
           const resp =
-            l === "hi"
-              ? "आप कह सकते हैं: गेम खेलो, वॉटर जग खोलो, मेरे रिमाइंडर दिखाओ, या प्रोग्रेस दिखाओ।"
-              : l === "as"
-                ? "আপুনি ক'ব পাৰে: খেল খোলক, সোঁৱৰণী দেখুওৱা, বা প্ৰগতি দেখুওৱা।"
-                : l === "bn"
-                  ? "আপনি বলতে পারেন: গেম খেলুন, রিমাইন্ডার দেখান, বা প্রোগ্রেস দেখান।"
-                  : "You can say: play games, open water jugs, show my reminders, or show my progress.";
+            VOICE_PROMPTS.HELP[l] ||
+            VOICE_PROMPTS.HELP.en;
           setLastResponse(resp);
           setStatusMessage(resp);
           await speak(resp);
@@ -488,13 +614,8 @@ export function useVoiceAssistant(
 
         default: {
           const resp =
-            l === "hi"
-              ? "क्षमा करें, मैं समझ नहीं पाया। आप 'गेम खेलो' या 'रिमाइंडर दिखाओ' कह सकते हैं।"
-              : l === "as"
-                ? "মই বুজি নাপালোঁ। 'খেল খোলক' বা 'সোঁৱৰণী দেখুওৱা' বুলি ক'ব পাৰে।"
-                : l === "bn"
-                  ? "বুঝতে পারিনি। 'গেম খেলুন' বা 'রিমাইন্ডার দেখান' বলতে পারেন।"
-                  : "I didn't quite catch that. Try saying 'play games' or 'show my reminders'.";
+            VOICE_PROMPTS.UNKNOWN[l] ||
+            VOICE_PROMPTS.UNKNOWN.en;
           setLastResponse(resp);
           setStatusMessage(resp);
           await speak(resp);
@@ -632,9 +753,11 @@ export function useVoiceAssistant(
       if (SpeechRec) {
         try {
           const rec = new SpeechRec();
-          recognitionRef.current = rec;
-          // Map language codes appropriately (e.g. Nepali in Google Speech is ne-NP)
-          rec.lang = language === "ne-IN" ? "ne-NP" : language;
+          const localeConfig = VOICE_LOCALE_MAP[language] || {
+            sttLocale: language,
+            fallbackStt: "en-IN",
+          };
+          rec.lang = localeConfig.sttLocale;
           rec.continuous = false;
           rec.interimResults = true;
           rec.maxAlternatives = 1;

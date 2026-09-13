@@ -3,7 +3,6 @@ import { useState } from "react";
 import { House, ArrowRight, UserPlus, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
 import { formatApiError } from "../api/client";
-import { BackendStatusBanner } from "../components/backend-status-banner";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -83,7 +82,6 @@ function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <BackendStatusBanner />
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-flex items-center gap-3">
           <span className="flex size-14 items-center justify-center rounded-xl bg-sun text-ink shadow-md">

@@ -64,6 +64,54 @@ const LOCALIZED_SUGGESTIONS: Record<string, Array<{ label: string; text: string 
     { label: "📊 प्रगति रिपोर्ट", text: "प्रगति देखाउनुहोस्" },
     { label: "🖼️ सम्झनाहरू", text: "सम्झनाहरू खोल्नुहोस्" },
   ],
+  te: [
+    { label: "🎮 వాటర్ జగ్స్", text: "వాటర్ జగ్స్ ఆట తెరువు" },
+    { label: "🧩 టవర్ ఆఫ్ హనోయ్", text: "టవర్ ఆఫ్ హనోయ్ ఆడు" },
+    { label: "💊 మందులు చూడండి", text: "నా మందుల సమయం చూపించు" },
+    { label: "📅 నేటి దినచర్య", text: "ఈ రోజు పనులు ఏంటి" },
+    { label: "📊 నా ప్రగతి", text: "నా ప్రగతి నివేదిక చూపించు" },
+    { label: "🖼️ జ్ఞాపకాలు", text: "జ్ఞాపకాల ఆల్బమ్ తెరువు" },
+  ],
+  ta: [
+    { label: "🎮 வாட்டர் ஜக்ஸ்", text: "வாட்டர் ஜக்ஸ் விளையாட்டு திற" },
+    { label: "🧩 டவர் ஆஃப் ஹனோய்", text: "டவர் ஆஃப் ஹனோய் விளையாடு" },
+    { label: "💊 மருந்துகளைக் காட்டு", text: "என் மருந்து அட்டவணையை காட்டு" },
+    { label: "📅 இன்றைய பணிகள்", text: "இன்றைய நினைவூட்டல் காட்டு" },
+    { label: "📊 முன்னேற்றம்", text: "என் முன்னேற்றத்தை காட்டு" },
+    { label: "🖼️ நினைவுகள்", text: "நினைவுகள் திற" },
+  ],
+  mr: [
+    { label: "🎮 वॉटर जग खेळ", text: "वॉटर जग खेळ उघडा" },
+    { label: "🧩 टॉवर ऑफ हनोई", text: "टॉवर ऑफ हनोई खेळा" },
+    { label: "💊 औषधे दाखवा", text: "माझी औषधे दाखवा" },
+    { label: "📅 आजचे काम", text: "आजचे रिमाइंडर्स दाखवा" },
+    { label: "📊 प्रगती अहवाल", text: "माझी प्रगती दाखवा" },
+    { label: "🖼️ आठवणींचा संग्रह", text: "आठवणी उघडा" },
+  ],
+  gu: [
+    { label: "🎮 વોટર જગ રમત", text: "વોટર જગ રમત ખોલો" },
+    { label: "🧩 ટાવર ઑફ હનોઇ", text: "ટાવર ઑફ હનોઇ રમો" },
+    { label: "💊 દવાઓ બતાવો", text: "મારી દવાઓનું સમયપત્રક બતાવો" },
+    { label: "📅 આજના કાર્યો", text: "આજના રિમાઇન્ડર શું છે" },
+    { label: "📊 પ્રગતિ અહેવાલ", text: "મારી પ્રગતિ બતાવો" },
+    { label: "🖼️ સ્મૃતિઓ", text: "સ્મૃતિઓ ખોલો" },
+  ],
+  mni: [
+    { label: "🎮 ঈশিংগী জগ", text: "ঈশিং জগ খেল হাংদোকউ" },
+    { label: "🧩 হ্যানোই টাৱার", text: "হ্যানোই খেল শানৌ" },
+    { label: "💊 হিদাক য়েংউ", text: "ঐগী হিদাক্কী মতম উৎলু" },
+    { label: "📅 ঙসিগী থবক", text: "ঙসিগী থবকশিং উৎলু" },
+    { label: "📊 চাউখৎপগী ৱাফম", text: "ঐগী চাউখৎপা উৎলু" },
+    { label: "🖼️ নীংশিংবা", text: "নীংশিংবা এলবাম হাংদোকউ" },
+  ],
+  brx: [
+    { label: "🎮 दै जग गेले", text: "दै जग गेलेनाय खेव" },
+    { label: "🧩 हानय टावार", text: "हानय गेले" },
+    { label: "💊 मुली नाय", text: "आंनि मुलिनी सम दिन्थि" },
+    { label: "📅 दिनैनि खामानि", text: "दिनैनि खामानिफोर दिन्थि" },
+    { label: "📊 दावगानाय", text: "आंनि दावगानाय दिन्थि" },
+    { label: "🖼️ गोसोखांथि", text: "गोसोखांथि खेव" },
+  ],
 };
 
 export function VoiceAssistantModal({
@@ -128,7 +176,7 @@ export function VoiceAssistantModal({
   const isProcessing = status === "processing";
   const isSpeaking = status === "speaking";
 
-  const langKey = language.slice(0, 2);
+  const langKey = (language.includes("-") ? language.split("-")[0] : language).toLowerCase();
   const suggestions = LOCALIZED_SUGGESTIONS[langKey] ?? LOCALIZED_SUGGESTIONS["en"] ?? [];
 
   return (
