@@ -6,13 +6,14 @@ from app.core.dependencies import (
 )
 from app.core.security import create_access_token
 from app.models.user import User, UserRole
+from app.models.patient import PatientProfile
 from app.schemas.auth import (
     AuthResponse,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
 )
-from app.schemas.user import UserResponse
+from app.schemas.user import UserProfileUpdate, UserResponse
 from app.schemas.patient import PatientProfileCreate
 from app.services.auth_service import (
     authenticate_user,
@@ -106,3 +107,35 @@ def get_me(
     current_user: User = Depends(get_current_user),
 ):
     return current_user
+
+
+@router.put(
+    "/profile",
+    response_model=UserResponse,
+    summary="Update current authenticated user's profile",
+)
+def update_profile(
+    data: UserProfileUpdate,
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    user = db.get(User, current_user.id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if data.name is not None and data.name.strip():
+        user.name = data.name.strip()
+    if data.phone is not None:
+        user.phone = data.phone.strip() if data.phone.strip() else None
+    if data.avatar_url is not None:
+        user.avatar_url = data.avatar_url
+    if data.preferred_language is not None and data.preferred_language.strip():
+        user.preferred_language = data.preferred_language.strip()
+        # Also sync patient_profile if exists
+        profile = db.query(PatientProfile).filter(PatientProfile.user_id == user.id).first()
+        if profile:
+            profile.preferred_language = user.preferred_language
+
+    db.commit()
+    db.refresh(user)
+    return user

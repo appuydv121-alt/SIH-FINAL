@@ -217,3 +217,39 @@ def get_patient_profile_by_id(
         )
 
     return profile
+
+
+@router.get(
+    "/{patient_id}/game-progress",
+)
+def get_patient_game_progress_by_id(
+    patient_id: UUID,
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    """Retrieve patient game level progression."""
+    from app.services.game_service import get_patient_game_progress
+
+    if current_user.role == UserRole.PATIENT and current_user.id != patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only access your own game progress",
+        )
+    elif current_user.role == UserRole.CARETAKER:
+        if not caretaker_has_patient_access(db, current_user.id, patient_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Caretaker is not assigned to this patient",
+            )
+    elif current_user.role == UserRole.DOCTOR:
+        if not doctor_has_patient_access(db, current_user.id, patient_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Doctor is not assigned to this patient",
+            )
+
+    prog_dict = get_patient_game_progress(db, patient_id)
+    return {
+        "patient_id": patient_id,
+        "games": prog_dict,
+    }

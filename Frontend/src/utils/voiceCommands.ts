@@ -112,6 +112,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "খেল মফম থংনবা। নত্ত্রা ২২ খেলসিংদগী অমা থীজিনু।",
     brx: "গামি মফম থংনবা। নংগীর ২২ গামিসো বাছনো।",
     ne: "गेम केन्द्र खोल्दैछु। तपाईंका २२ वटा खेलहरू उपलब्ध छन्।",
+    te: "గేమ్స్ శిక్షణ కేంద్రాన్ని తెరుస్తున్నాను. మీరు 22 బ్రెయిన్ వ్యాయామాల నుండి ఎంచుకోవచ్చు.",
+    ta: "மூளை பயிற்சி மையத்தைத் திறக்கிறேன். நீங்கள் 22 பயிற்சிகளிலிருந்து தேர்ந்தெடுக்கலாம்.",
+    mr: "मेंदू प्रशिक्षण केंद्र उघडत आहे. आपण २२ खेळांमधून निवडू शकता.",
+    gu: "બ્રેઇન ટ્રેનિંગ સેન્ટર ખોલી રહ્યો છું. તમે ૨૨ કસરતોમાંથી પસંદ કરી શકો છો.",
   },
   openGame: {
     en: (name: string) => `Opening ${name}. Get ready to play!`,
@@ -121,6 +125,10 @@ export const LOCALIZED_RESPONSES = {
     mni: (name: string) => `${name} থীজিল্লে। শানবা সাজু ওইরিবা!`,
     brx: (name: string) => `${name} বাছ। শানবা সাজু!`,
     ne: (name: string) => `${name} खोल्दैछु। खेल्नका लागि तयार हुनुहोस्!`,
+    te: (name: string) => `${name} ఆటను తెరుస్తున్నాను. ఆడటానికి సిద్ధంగా ఉండండి!`,
+    ta: (name: string) => `${name} விளையாட்டைத் திறக்கிறேன்.`,
+    mr: (name: string) => `${name} खेळ उघडत आहे.`,
+    gu: (name: string) => `${name} રમત ખોલી રહ્યો છું.`,
   },
   nextGame: {
     en: (name: string) => `Next game is ${name}. Navigating there now.`,
@@ -130,6 +138,10 @@ export const LOCALIZED_RESPONSES = {
     mni: (name: string) => `মতম অদুগী খেল ${name}নি।`,
     brx: (name: string) => `গাবো গামি ${name}নি।`,
     ne: (name: string) => `अर्को खेल ${name} हो। त्यहाँ जाँदैछु।`,
+    te: (name: string) => `తదుపరి ఆట ${name}. అక్కడికి వెళ్తున్నాం.`,
+    ta: (name: string) => `அடுத்த விளையாட்டு: ${name}.`,
+    mr: (name: string) => `पुढील खेळ: ${name}.`,
+    gu: (name: string) => `આગામી રમત: ${name}.`,
   },
   openReminders: {
     en: "Opening your daily routine and schedule.",
@@ -139,6 +151,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "নুমিদাংগী সোঁৱৰণী থীজিল্লে।",
     brx: "গাবোর রিমাইন্ডার বাছ।",
     ne: "तपाईंको दैनिक कार्य तालिका खोल्दैछु।",
+    te: "మీ రోజువారీ కార్యకలాపాలు మరియు రిమైండర్‌లను తెరుస్తున్నాను.",
+    ta: "உங்கள் தினசரி அட்டவணையைத் திறக்கிறேன்.",
+    mr: "आपली दैनिक दिनचर्या उघडत आहे.",
+    gu: "તમારું દૈનિક સમયપત્રક ખોલી રહ્યો છું.",
   },
   todayReminders: {
     en: (summary: string) => `Today's schedule: ${summary}. Opening your routine.`,
@@ -148,6 +164,10 @@ export const LOCALIZED_RESPONSES = {
     mni: (summary: string) => `নুমিদাংগী কাযর্নবী: ${summary}।`,
     brx: (summary: string) => `গাবোর খামনি: ${summary}।`,
     ne: (summary: string) => `आजको कार्यतालिका: ${summary}। तपाईंको तालिका खोल्दैछु।`,
+    te: (summary: string) => `ఈ రోజు షెడ్యూల్: ${summary}. మీ దినచర్యను తెరుస్తున్నాను.`,
+    ta: (summary: string) => `இன்றைய அட்டவணை: ${summary}.`,
+    mr: (summary: string) => `आजचे वेळापत्रक: ${summary}.`,
+    gu: (summary: string) => `આજનું સમયપત્રક: ${summary}.`,
   },
   nextReminder: {
     en: (item: string) => `Your next scheduled activity is: ${item}.`,
@@ -157,6 +177,10 @@ export const LOCALIZED_RESPONSES = {
     mni: (item: string) => `নত্ত্রা মতম অদুগী সোঁৱৰণী: ${item}।`,
     brx: (item: string) => `নংগীর গাবো রিমাইন্ডার: ${item}।`,
     ne: (item: string) => `तपाईंको अर्को निर्धारित कार्य: ${item}।`,
+    te: (item: string) => `మీ తదుపరి కార్యం: ${item}.`,
+    ta: (item: string) => `உங்கள் அடுத்த பணி: ${item}.`,
+    mr: (item: string) => `आपले पुढील काम: ${item}.`,
+    gu: (item: string) => `તમારું આગળનું કાર્ય: ${item}.`,
   },
   openMedications: {
     en: "Opening your medicine timeline and prescriptions.",
@@ -166,6 +190,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "ওয়াঠোক চক্লু মফম।",
     brx: "দাও খাও মফম।",
     ne: "औषधि तालिका खोल्दैछु।",
+    te: "మీ ఔషధ సమయ సూచికను తెరుస్తున్నాను.",
+    ta: "உங்கள் மருந்து அட்டவணையைத் திறக்கிறேன்.",
+    mr: "आपले औषध वेळापत्रक उघडत आहे.",
+    gu: "તમારું દવાઓનું સમયપત્રક ખોલી રહ્યો છું.",
   },
   goHome: {
     en: "Navigating to home dashboard.",
@@ -175,6 +203,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "হোম পেজদা চৎলে।",
     brx: "হোম পেজাও থাং।",
     ne: "गृहपृष्ठमा जाँदैछु।",
+    te: "ప్రధాన డ్యాష్‌బోర్డ్‌కు వెళ్తున్నాను.",
+    ta: "முகப்புப் பக்கத்திற்குச் செல்கிறேன்.",
+    mr: "मुख्य पृष्ठावर जात आहे.",
+    gu: "મુખ્ય પૃષ્ઠ પર જઈ રહ્યો છું.",
   },
   openAnalytics: {
     en: "Opening your cognitive progress and assessment report.",
@@ -182,8 +214,12 @@ export const LOCALIZED_RESPONSES = {
     as: "আপোনাৰ প্ৰগতি আৰু মূল্যায়ন প্ৰতিবেদন খোলি আছোঁ।",
     bn: "আপনার মানসিক প্রগতি ও মূল্যায়ন রিপোর্ট খুলছি।",
     mni: "প্ৰগতি ৰিপোৰ্ট।",
-    brx: "উন্নতি রিপোর্ট।",
+    brx: "উন্নতি report।",
     ne: "प्रगति तथा मूल्यांकन रिपोर्ट खोल्दैछु।",
+    te: "మీ కాగ్నిటివ్ ప్రోగ్రెస్ రిపోర్ట్‌ను తెరుస్తున్నాను.",
+    ta: "உங்கள் முன்னேற்ற அறிக்கையைத் திறக்கிறேன்.",
+    mr: "आपला प्रगती अहवाल उघडत आहे.",
+    gu: "તમારો પ્રગતિ અહેવાલ ખોલી રહ્યો છું.",
   },
   openCaregiver: {
     en: "Opening Caregiver Hub.",
@@ -193,6 +229,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "কেয়াৰগিভাৰ মফম।",
     brx: "কেয়ারগিভার হাব।",
     ne: "हेरचाह केन्द्र खोल्दैछु।",
+    te: "కేర్‌గివర్ హబ్‌ను తెరుస్తున్నాను.",
+    ta: "பராமரிப்பாளர் மையத்தைத் திறக்கிறேன்.",
+    mr: "केअरगिव्हर हब उघडत आहे.",
+    gu: "સંભાળ કેન્દ્ર ખોલી રહ્યો છું.",
   },
   unauthorizedRole: {
     en: (portal: string) =>
@@ -204,6 +244,10 @@ export const LOCALIZED_RESPONSES = {
     mni: () => "প্ৰৱেশ অথোইবা নত্তে।",
     brx: () => "অনুমতি গৈয়া।",
     ne: () => "पहुँच सीमित छ। यो भाग अधिकृत हेरचाहकर्ताका लागि मात्र हो।",
+    te: () => "ఈ పేజీ కేవలం సంరక్షకుల (Caretaker) కోసం మాత్రమే.",
+    ta: () => "அனுமதி கட்டுப்படுத்தப்பட்டுள்ளது.",
+    mr: () => "प्रवेश मर्यादित आहे.",
+    gu: () => "પ્રવેશ મર્યાદિત છે.",
   },
   help: {
     en: "You can say: Play memory match, Open games, What should I do today, Show my reminders, Show my medicine, or Go home.",
@@ -213,6 +257,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "নত্ত্রা হায়থোক্তুনা: খেল শানবা, সোঁৱৰণী থীজিনু, নাইতনা হোমদা চৎনু।",
     brx: "নংগীর হানজা: গামি মফম, রিমাইন্ডার বাছ, হোম পেজাও থাং।",
     ne: "तपाईं भन्न सक्नुहुन्छ: मेमोरी खेल खेल्नुस्, गेम खोल्नुस्, आज के गर्ने, वा घर जानुस्।",
+    te: "మీరు ఇలా చెప్పవచ్చు: ఆటలు ఆడండి, ఈ రోజు షెడ్యూల్ చూపించండి, మందులు చూపించండి లేదా హోమ్‌కు వెళ్లండి.",
+    ta: "நீங்கள் சொல்லலாம்: விளையாட்டு தொடங்கு, நினைவூட்டல்களைக் காட்டு, முகப்புக்குச் செல்.",
+    mr: "आपण म्हणू शकता: खेळ सुरू करा, स्मरणपत्रे दाखवा, घरी जा.",
+    gu: "તમે કહી શકો છો: રમત ખોલો, રીમાઇન્ડર બતાવો, ઘર જાઓ.",
   },
   stopSpeaking: {
     en: "Voice response stopped.",
@@ -222,6 +270,10 @@ export const LOCALIZED_RESPONSES = {
     mni: "হায়বা তোক্লে।",
     brx: "বায়না তোক্লে।",
     ne: "आवाज रोकियो।",
+    te: "వాయిస్ ఆపబడింది.",
+    ta: "குரல் நிறுத்தப்பட்டது.",
+    mr: "आवाज थांबवला.",
+    gu: "અવાજ રોકી દેવાયો.",
   },
   unknown: {
     en: "I didn't quite catch that. Try saying 'Play game' or 'What should I do today?'.",
@@ -231,10 +283,16 @@ export const LOCALIZED_RESPONSES = {
     mni: "মই বুজিদ্রে। খেল শানবা হায়বিনু।",
     brx: "মই বুজিদ্রে। গামি মফম হায়নো।",
     ne: "मैले बुझ्न सकिनँ। 'खेल खेल्नुस्' वा 'आज के गर्ने' भन्नुहोस्।",
+    te: "క్షమించండి, నాకు అర్థం కాలేదు. దయచేసి 'గేమ్స్ ఆడండి' లేదా 'ఈ రోజు ఏమి చేయాలి' అని ప్రయత్నించండి.",
+    ta: "மன்னிக்கவும், புரியவில்லை. 'விளையாடு' அல்லது 'இன்று என்ன செய்ய வேண்டும்' என்று கூறவும்.",
+    mr: "मला समजले नाही. 'खेळ सुरू करा' किंवा 'आज काय करायचे' असे म्हणून पहा.",
+    gu: "મને સમજાયું નથી. 'રમત રમો' અથવા 'આજે શું કરવું' કહીને પ્રયાસ કરો.",
   },
 };
 
-export function getLangKey(code: string): "en" | "hi" | "as" | "bn" | "mni" | "brx" | "ne" {
+export function getLangKey(
+  code: string,
+): "en" | "hi" | "as" | "bn" | "mni" | "brx" | "ne" | "te" | "ta" | "mr" | "gu" {
   const prefix = code.split("-")[0].toLowerCase();
   if (prefix === "hi") return "hi";
   if (prefix === "as") return "as";
@@ -242,6 +300,10 @@ export function getLangKey(code: string): "en" | "hi" | "as" | "bn" | "mni" | "b
   if (prefix === "mni") return "mni";
   if (prefix === "brx") return "brx";
   if (prefix === "ne") return "ne";
+  if (prefix === "te") return "te";
+  if (prefix === "ta") return "ta";
+  if (prefix === "mr") return "mr";
+  if (prefix === "gu") return "gu";
   return "en";
 }
 

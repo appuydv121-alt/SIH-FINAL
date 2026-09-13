@@ -12,10 +12,12 @@ interface GameCardProps {
 
 export function GameCard({ game, bestLevel, bestScore, lastPlayed }: GameCardProps) {
   const categoryStyle = CATEGORY_COLORS[game.category] ?? "bg-clay/30 text-cream/70 border-clay";
+  const targetLevel = Math.min(game.maxLevel, (bestLevel !== undefined && bestLevel > 0) ? bestLevel + 1 : 1);
 
   return (
     <Link
       to={`/games/${game.id}` as never}
+      search={{ level: String(targetLevel) } as never}
       className="group flex flex-col gap-4 rounded-2xl border border-clay bg-surface p-5 shadow-card transition-all duration-200 hover:border-sun/50 hover:shadow-card-active hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun"
       aria-label={`Play ${game.name}`}
     >

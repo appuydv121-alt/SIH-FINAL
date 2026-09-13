@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Mic, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import { useVoiceAssistant } from "../hooks/useVoiceAssistant";
 import { VoiceAssistantModal } from "./VoiceAssistantModal";
 import type { VoiceLanguageCode } from "../types/voice.types";
@@ -11,11 +13,14 @@ interface VoiceTriggerButtonProps {
 
 export function VoiceTriggerButton({
   className = "",
-  defaultLanguage = "en-IN",
+  defaultLanguage,
 }: VoiceTriggerButtonProps) {
+  const { user, isAuthenticated } = useAuth();
+  const { language: currentLang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const handleClose = () => setIsOpen(false);
-  const assistant = useVoiceAssistant(defaultLanguage, handleClose);
+  const activeLanguage = defaultLanguage || currentLang;
+  const assistant = useVoiceAssistant(activeLanguage, handleClose);
 
   useEffect(() => {
     const handleOpenEvent = () => {
@@ -37,6 +42,11 @@ export function VoiceTriggerButton({
     e.stopPropagation();
     setIsOpen(true);
   };
+
+  // Voice Assistant is exclusively for Patients (hidden for Caregivers and Doctors)
+  if (isAuthenticated && (user?.role === "caretaker" || user?.role === "doctor")) {
+    return null;
+  }
 
   const isListening = assistant.status === "listening";
 

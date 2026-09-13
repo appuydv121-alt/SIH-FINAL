@@ -137,6 +137,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 import { AuthProvider } from "../context/auth-context";
+import { LanguageProvider } from "../context/LanguageContext";
 import { Toaster } from "../components/ui/sonner";
 import { VoiceTriggerButton } from "@/features/voice/components/VoiceTriggerButton";
 
@@ -146,10 +147,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BackendStatusBanner />
-        <Outlet />
-        <VoiceTriggerButton />
-        <Toaster position="bottom-right" />
+        <LanguageProvider>
+          <BackendStatusBanner />
+          <Outlet />
+          <VoiceTriggerButton />
+          <Toaster position="bottom-right" />
+        </LanguageProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

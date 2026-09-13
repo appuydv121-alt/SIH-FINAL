@@ -85,12 +85,12 @@ export default function Step1Personal({ patient, updatePatient }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-ink mb-2">Assigned Doctor</label>
+        <label className="block text-sm font-medium text-ink mb-2">Assigned Doctor (Optional)</label>
         <input
           type="text"
           value={patient.doctorName}
           onChange={(e) => updatePatient({ doctorName: e.target.value })}
-          placeholder="Dr. Anil Baruah"
+          placeholder="e.g., Dr. Anil Baruah (optional)"
           className="w-full px-3 py-3 bg-cream border border-clay/40 rounded-xl text-base text-ink focus:outline-none focus:ring-2 focus:ring-fire"
         />
       </div>

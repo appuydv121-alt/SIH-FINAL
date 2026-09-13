@@ -1,10 +1,14 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
+from sqlalchemy import select
 
 from app.core.dependencies import DBSession, get_current_user
+from app.models.game import GameAssignment
 from app.models.user import User, UserRole
 from app.schemas.game import (
+    GameProgressResponse,
     GameSessionCreate,
     GameSessionResponse,
     GameSummaryResponse,
@@ -12,6 +16,7 @@ from app.schemas.game import (
 )
 from app.services.game_service import (
     get_available_game_types,
+    get_patient_game_progress,
     get_patient_game_sessions,
     get_patient_game_summary,
     record_game_session,
@@ -141,6 +146,25 @@ def get_game_summary(
     )
 
 
+@router.get(
+    "/sessions/patient/{patient_id}/progress",
+    response_model=GameProgressResponse,
+)
+def get_game_progress(
+    patient_id: UUID,
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    """Get level progression and best scores for all games for a patient."""
+    verify_patient_access(db, current_user, patient_id)
+
+    prog_dict = get_patient_game_progress(
+        db=db,
+        patient_id=patient_id,
+    )
+    return GameProgressResponse(patient_id=patient_id, games=prog_dict)
+
+
 # ---------------------------------------------------------------------------
 # Convenience endpoints — authenticated user operates on their own record
 # ---------------------------------------------------------------------------
@@ -182,3 +206,88 @@ def get_my_game_summary(
         db=db,
         patient_id=current_user.id,
     )
+
+
+@router.get(
+    "/sessions/my/progress",
+    response_model=GameProgressResponse,
+    summary="Get my game progression",
+)
+def get_my_game_progress(
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    """Get the current user's own game level progression."""
+    prog_dict = get_patient_game_progress(
+        db=db,
+        patient_id=current_user.id,
+    )
+    return GameProgressResponse(patient_id=current_user.id, games=prog_dict)
+
+
+class AssignGamesRequest(BaseModel):
+    game_ids: list[str]
+
+
+@router.get(
+    "/patient/{patient_id}/assigned",
+    response_model=list[str],
+    summary="List active game IDs assigned to patient",
+)
+def get_patient_assigned_games(
+    patient_id: UUID,
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    verify_patient_access(db, current_user, patient_id)
+    assignments = db.scalars(
+        select(GameAssignment.game_id)
+        .where(
+            GameAssignment.patient_id == patient_id,
+            GameAssignment.is_active.is_(True),
+        )
+    ).all()
+    # If no games explicitly assigned, return all available game types by default
+    if not assignments:
+        all_types = get_available_game_types()
+        return [g.id for g in all_types]
+    return list(assignments)
+
+
+@router.post(
+    "/patient/{patient_id}/assign",
+    response_model=list[str],
+    summary="Assign a list of games for patient",
+)
+def set_patient_assigned_games(
+    patient_id: UUID,
+    data: AssignGamesRequest,
+    db: DBSession,
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role not in (UserRole.CARETAKER, UserRole.DOCTOR, UserRole.ADMIN):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only caregivers or doctors can configure game assignments",
+        )
+    verify_patient_access(db, current_user, patient_id)
+
+    # Deactivate existing assignments
+    existing = db.scalars(
+        select(GameAssignment).where(GameAssignment.patient_id == patient_id)
+    ).all()
+    for a in existing:
+        a.is_active = False
+
+    # Insert new active assignments
+    for gid in data.game_ids:
+        new_a = GameAssignment(
+            patient_id=patient_id,
+            game_id=gid.strip(),
+            assigned_by=current_user.id,
+            is_active=True,
+        )
+        db.add(new_a)
+
+    db.commit()
+    return data.game_ids

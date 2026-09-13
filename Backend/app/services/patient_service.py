@@ -50,6 +50,9 @@ def create_patient_profile(
         emergency_contact_name=data.emergency_contact_name,
         emergency_contact_phone=data.emergency_contact_phone,
         preferred_language=data.preferred_language,
+        gender=data.gender,
+        address=data.address,
+        doctor_name=data.doctor_name,
         timezone=data.timezone,
     )
 

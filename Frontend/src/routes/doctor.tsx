@@ -43,13 +43,7 @@ export const Route = createFileRoute("/doctor")({
 
 function DoctorPage() {
   const queryClient = useQueryClient();
-  const { user, isAuthenticated, demoLogin } = useAuth();
-
-  useEffect(() => {
-    if (!isAuthenticated || user?.role !== "doctor") {
-      demoLogin("doctor").catch(() => {});
-    }
-  }, [isAuthenticated, user, demoLogin]);
+  const { user } = useAuth();
 
   const {
     data: dashboard,

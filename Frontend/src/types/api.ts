@@ -26,6 +26,9 @@ export interface PatientProfile {
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   preferred_language: string;
+  gender?: string | null;
+  address?: string | null;
+  doctor_name?: string | null;
   timezone: string;
   created_at: string;
   updated_at: string;
@@ -36,6 +39,9 @@ export interface PatientProfileUpdate {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   preferred_language?: string;
+  gender?: string;
+  address?: string;
+  doctor_name?: string;
   timezone?: string;
 }
 
@@ -164,6 +170,7 @@ export interface GameSession {
   duration_seconds: number;
   difficulty: string;
   level_achieved: number;
+  next_level_unlocked?: number;
   metrics: string | null;
   completed_at: string;
   created_at: string;
@@ -187,6 +194,20 @@ export interface GameSummary {
   average_accuracy: number;
   favorite_game: string | null;
   recent_improvement_percentage: number;
+}
+
+export interface SingleGameProgress {
+  game_id: string;
+  highest_level_won: number;
+  current_unlocked_level: number;
+  best_score: number;
+  total_played: number;
+  last_played: string | null;
+}
+
+export interface GameProgressResponse {
+  patient_id: string;
+  games: Record<string, SingleGameProgress>;
 }
 
 export type RiskLevel = "low" | "moderate" | "high" | "critical";
@@ -254,6 +275,7 @@ export interface DoctorDashboardPatient {
 
 export interface CaregiverDashboardPatient {
   patient: User;
+  profile?: PatientProfile | null;
   latest_cognitive_score: number | null;
   risk_level: RiskLevel | "unassessed";
   pending_medication_count: number;
@@ -265,6 +287,137 @@ export interface CaregiverDashboard {
   caretaker_name: string;
   total_patients: number;
   patients: CaregiverDashboardPatient[];
+}
+
+export interface CaretakerPatientDetail {
+  patient: User;
+  profile: PatientProfile | null;
+  relationship_type: string | null;
+  active: boolean;
+  connected_since: string;
+}
+
+export interface InitialTaskInput {
+  title: string;
+  description?: string;
+  scheduled_time?: string;
+  priority?: TaskPriority;
+  recurrence?: TaskRecurrence;
+}
+
+export interface InitialMedicationInput {
+  medicine_name: string;
+  dosage: string;
+  scheduled_time?: string;
+  instructions?: string;
+}
+
+export interface CaretakerAddPatientRequest {
+  email: string;
+  password?: string;
+  name?: string;
+  age?: number | string;
+  date_of_birth?: string;
+  gender?: string;
+  phone?: string;
+  address?: string;
+  emergency_contact_name?: string;
+  emergency_contact_phone?: string;
+  doctor_name?: string;
+  preferred_language?: string;
+  relationship_type?: string;
+  initial_tasks?: InitialTaskInput[];
+  initial_medications?: InitialMedicationInput[];
+}
+
+export interface CaretakerAddPatientResponse {
+  success: boolean;
+  is_new_patient: boolean;
+  message: string;
+  patient: User;
+  profile: PatientProfile | null;
+  relationship_id: string;
+}
+
+export interface CaretakerCreateMedicationRequest {
+  medicine_name: string;
+  dosage: string;
+  scheduled_time?: string;
+  instructions?: string;
+  frequency?: MedicationFrequency;
+}
+
+export interface CaretakerCreateTaskRequest {
+  title: string;
+  description?: string;
+  scheduled_time?: string;
+  priority?: TaskPriority;
+  recurrence?: TaskRecurrence;
+}
+
+export interface CaretakerTaskItem {
+  id: string;
+  title: string;
+  description: string | null;
+  scheduled_time: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  completed_at: string | null;
+}
+
+export interface CaretakerMedicationItem {
+  id: string;
+  medicine_name: string;
+  dosage: string;
+  scheduled_time: string;
+  status: string;
+  taken_at: string | null;
+  instructions?: string | null;
+}
+
+export interface CaretakerGameSessionItem {
+  id: string;
+  game_name: string;
+  game_id: string;
+  score: number;
+  accuracy: number;
+  duration_seconds: number;
+  level_achieved: number;
+  difficulty: string;
+  completed_at: string;
+}
+
+export interface CaretakerPatientAnalytics {
+  patient_id: string;
+  overall_score: number;
+  risk_level: string;
+  trend: string;
+  cognitive_scores: {
+    memory: number;
+    attention: number;
+    executive: number;
+    language: number;
+  };
+  insights: string[];
+  recommendations: string[];
+  total_tasks: number;
+  completed_tasks: number;
+  pending_tasks: number;
+  missed_tasks: number;
+  task_completion_rate: number;
+  total_medications_scheduled: number;
+  medications_taken: number;
+  medications_pending: number;
+  medications_missed: number;
+  medication_adherence_rate: number;
+  total_games_played: number;
+  average_game_score: number;
+  average_game_accuracy: number;
+  best_game_score: number;
+  total_game_duration_seconds: number;
+  games_played: string[];
+  recent_game_sessions: CaretakerGameSessionItem[];
+  daily_scores: Array<{ date: string; overallScore: number }>;
 }
 
 export interface ApiError {

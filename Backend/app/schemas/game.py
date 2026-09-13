@@ -18,6 +18,16 @@ class GameSessionCreate(BaseModel):
     metrics: dict[str, Any] | None = None
     completed_at: datetime | None = None
 
+    @field_validator("metrics", mode="before")
+    @classmethod
+    def parse_metrics_input(cls, v: Any) -> dict[str, Any] | None:
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return None
+        return v
+
 
 class GameSessionResponse(BaseModel):
     id: UUID
@@ -29,6 +39,7 @@ class GameSessionResponse(BaseModel):
     duration_seconds: int
     difficulty: str
     level_achieved: int
+    next_level_unlocked: int = 1
     metrics: dict[str, Any] | None = None
     completed_at: datetime
     created_at: datetime
@@ -53,6 +64,20 @@ class GameSummaryResponse(BaseModel):
     total_duration_seconds: int
     games_played: list[str]
     recent_sessions: list[GameSessionResponse]
+
+
+class SingleGameProgress(BaseModel):
+    game_id: str
+    highest_level_won: int
+    current_unlocked_level: int
+    best_score: int
+    total_played: int
+    last_played: datetime | None = None
+
+
+class GameProgressResponse(BaseModel):
+    patient_id: UUID
+    games: dict[str, SingleGameProgress]
 
 
 class GameTypeInfo(BaseModel):

@@ -381,16 +381,31 @@ export function useVoiceAssistant(
             } else {
               resp =
                 l === "hi"
-                  ? "आपका अगला रिमाइंडर समय पर दवा और स्वास्थ्य जांच का है।"
+                  ? "आज के लिए आपका कोई और बाकी काम नहीं है।"
                   : l === "as"
-                    ? "আপোনাৰ পৰৱৰ্তী কাম হৈছে সময়মতে ঔষধ গ্ৰহণ।"
-                    : "Your next reminder is morning medication scheduled on time.";
+                    ? "আজিলৈ আপোনাৰ কোনো বাকী থকা কাম নাই।"
+                    : l === "bn"
+                      ? "আজকের জন্য আপনার আর কোনো বকেয়া কাজ নেই।"
+                      : l === "ne"
+                        ? "आजको लागि तपाईंको कुनै बाँकी काम छैन।"
+                        : l === "te"
+                          ? "ఈ రోజుకి మీకు ఇకపై పెండింగ్ పనులు ఏవీ లేవు."
+                          : l === "ta"
+                            ? "இன்று உங்களுக்கு வேறு நிலுவையில் உள்ள பணிகள் எதுவும் இல்லை."
+                            : l === "mr"
+                              ? "आज तुमच्यासाठी कोणतेही प्रलंबित काम उरलेले नाही."
+                              : l === "gu"
+                                ? "આજે તમારા માટે કોઈ બાકી કાર્યો નથી."
+                                : "You have no more pending tasks scheduled for today.";
             }
             setLastResponse(resp);
             setStatusMessage(resp);
             await speak(resp);
           } catch {
-            const resp = "Your next reminder is scheduled medication.";
+            const resp =
+              l === "hi"
+                ? "आज के लिए आपका कोई और बाकी काम नहीं है।"
+                : "You have no more pending tasks scheduled for today.";
             setLastResponse(resp);
             setStatusMessage(resp);
             await speak(resp);

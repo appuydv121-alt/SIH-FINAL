@@ -16,8 +16,8 @@ interface AuthContextType {
     role: UserRole;
     phone?: string;
   }) => Promise<User>;
+  refetchMe: () => Promise<User | null>;
   logout: () => void;
-  demoLogin: (role: "patient" | "doctor" | "caretaker") => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const refetchMe = useCallback(async (): Promise<User | null> => {
+    try {
+      const verifiedUser = await authApi.getMe();
+      setUser(verifiedUser);
+      return verifiedUser;
+    } catch {
+      return null;
+    }
+  }, []);
 
   // Initialize from storage on mount
   useEffect(() => {
@@ -110,19 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
   }, []);
 
-  const demoLogin = useCallback(
-    async (role: "patient" | "doctor" | "caretaker"): Promise<User> => {
-      const credentials = {
-        patient: { email: "lalita@cucove.com", password: "Password123!" },
-        caretaker: { email: "caregiver@cucove.com", password: "Password123!" },
-        doctor: { email: "doctor@cucove.com", password: "Password123!" },
-      }[role];
-
-      return login(credentials.email, credentials.password);
-    },
-    [login],
-  );
-
   return (
     <AuthContext.Provider
       value={{
@@ -132,8 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         login,
         register,
+        refetchMe,
         logout,
-        demoLogin,
       }}
     >
       {children}

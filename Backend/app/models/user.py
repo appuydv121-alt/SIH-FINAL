@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, String
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -48,6 +48,17 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(
         String(20),
         nullable=True,
+    )
+
+    avatar_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    preferred_language: Mapped[str] = mapped_column(
+        String(20),
+        default="en-IN",
+        nullable=False,
     )
 
     is_active: Mapped[bool] = mapped_column(

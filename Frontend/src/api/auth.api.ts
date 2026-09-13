@@ -28,6 +28,16 @@ export const authApi = {
     return user;
   },
 
+  updateProfile: async (params: {
+    name?: string;
+    phone?: string;
+    avatar_url?: string;
+  }): Promise<User> => {
+    const user = await apiClient.put<User>("/auth/profile", params);
+    setStoredUser(user);
+    return user;
+  },
+
   logout: (): void => {
     clearStoredAuth();
   },

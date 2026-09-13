@@ -9,16 +9,16 @@ import {
   Volume2,
   Sparkles,
   RefreshCw,
+  Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import profilePhoto from "@/assets/profile-lalita.jpg";
-import memoryPhotos from "@/assets/memory-triptych.jpg";
 import { Button } from "@/components/ui/button";
 import { NavigationHeader } from "@/components/navigation-header";
 import { useAuth } from "@/hooks/use-auth";
 import { useTasks } from "@/hooks/use-tasks";
 import { useMedications } from "@/hooks/use-medications";
+import { useMemories } from "@/hooks/use-memories";
 import { useGames } from "@/hooks/use-games";
 import { formatApiError } from "@/api/client";
 import { voiceApi } from "@/api/voice.api";
@@ -46,17 +46,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { user, isAuthenticated, demoLogin } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { todayTasks, completeTask, isLoading: tasksLoading } = useTasks();
   const { todayLogs, todaySchedules, updateLogStatus, isLoading: medsLoading } = useMedications();
+  const { memories, isLoading: memoriesLoading } = useMemories();
   const { summary: gameSummary } = useGames();
 
-  // Auto-login as Lalita (Patient) if not logged in to give instant friendly access
-  useEffect(() => {
-    if (!isAuthenticated) {
-      demoLogin("patient").catch(() => {});
-    }
-  }, [isAuthenticated, demoLogin]);
+  // Dynamic Memories Cover & Content
+  const memoryWithImage = memories.find((m) => !!m.image_url);
+  const latestMemory = memories[0];
+  const coverImage = memoryWithImage?.image_url || latestMemory?.image_url;
+  const hasMemories = memories.length > 0;
 
   // Next scheduled medication
   const nextScheduledLog = todayLogs.find((l) => l.status === "scheduled") || todayLogs[0];
@@ -64,12 +64,13 @@ function Index() {
     ? todaySchedules.find((s) => s.id === nextScheduledLog.schedule_id)
     : todaySchedules[0];
 
+  const hasMedication = !!nextScheduledLog && !!matchingSchedule;
   const isMedicineTaken = nextScheduledLog ? nextScheduledLog.status === "taken" : false;
 
   // Real Progress Calculation
   const totalTasksCount = todayTasks.length;
   const completedTasksCount = todayTasks.filter((t) => t.status === "completed").length;
-  const totalMedsCount = todayLogs.length || 1;
+  const totalMedsCount = todayLogs.length;
   const completedMedsCount = todayLogs.filter((l) => l.status === "taken").length;
 
   const totalItems = totalTasksCount + totalMedsCount;
@@ -122,7 +123,7 @@ function Index() {
         {/* Reassuring Greeting */}
         <p className="text-xl font-extrabold uppercase tracking-wider text-sun">{todayFormatted}</p>
         <h1 className="mt-3 font-display text-5xl font-bold leading-tight text-cream sm:text-7xl">
-          Good morning, {user?.name?.split(" ")[0] || "Lalita"} <span aria-hidden="true">👋</span>
+          Good morning, {user?.name?.split(" ")[0] || "Friend"} <span aria-hidden="true">👋</span>
         </h1>
         <p className="mt-3 text-2xl text-cream/80 max-w-2xl">
           Here is your day. Take it one gentle step at a time.
@@ -145,7 +146,7 @@ function Index() {
                 Memory Match
               </h2>
               <p className="mt-4 max-w-xl text-xl leading-relaxed opacity-90">
-                {gameSummary?.total_sessions
+                {gameSummary && gameSummary.total_sessions > 0
                   ? `You've completed ${gameSummary.total_sessions} game sessions with an average accuracy of ${Math.round(gameSummary.average_accuracy)}%. Find matching pairs today!`
                   : "Find the matching card pairs. A calming activity to stimulate recall and keep your memory sharp."}
               </p>
@@ -172,7 +173,11 @@ function Index() {
           {/* Real Backend Medication Card */}
           <article
             className={`relative flex min-h-96 flex-col justify-between rounded-2xl p-7 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-card-active sm:p-10 ${
-              isMedicineTaken ? "bg-tea-confirm text-cream" : "bg-fire text-ink"
+              !hasMedication
+                ? "bg-surface text-cream border border-clay"
+                : isMedicineTaken
+                ? "bg-tea-confirm text-cream"
+                : "bg-fire text-ink"
             }`}
           >
             <Link
@@ -186,11 +191,21 @@ function Index() {
                 <Pill size={32} aria-hidden="true" /> Medication
               </div>
               <span className="text-sm font-bold opacity-80 uppercase tracking-wider">
-                {isMedicineTaken ? "Completed" : "Due Today"}
+                {!hasMedication ? "No Prescriptions" : isMedicineTaken ? "Completed" : "Due Today"}
               </span>
             </div>
 
-            {isMedicineTaken ? (
+            {!hasMedication ? (
+              <div className="relative z-10 pointer-events-none flex flex-1 flex-col items-center justify-center text-center py-6">
+                <span className="flex size-20 items-center justify-center rounded-full bg-clay/50 text-cream/70 mb-4">
+                  <Pill size={40} />
+                </span>
+                <h2 className="text-2xl font-bold">No medicines assigned yet</h2>
+                <p className="mt-2 text-lg text-cream/70 max-w-sm">
+                  Your caretaker or doctor will add your daily medications here.
+                </p>
+              </div>
+            ) : isMedicineTaken ? (
               <div className="relative z-10 pointer-events-none flex flex-1 flex-col items-center justify-center text-center py-6">
                 <span className="flex size-24 items-center justify-center rounded-full bg-cream text-tea-confirm shadow-inner">
                   <Check size={58} strokeWidth={3} aria-hidden="true" />
@@ -208,57 +223,88 @@ function Index() {
                     : "10:00 AM"}
                 </p>
                 <h2 className="mt-2 text-3xl font-bold">
-                  {matchingSchedule?.medicine_name || "Donepezil"} Due
+                  {matchingSchedule?.medicine_name} Due
                 </h2>
                 <p className="mt-2 text-xl opacity-90">
-                  {matchingSchedule?.dosage || "5mg - 1 tablet"} · Take with warm water after
-                  breakfast
+                  {matchingSchedule?.dosage} · {matchingSchedule?.instructions || "Take as prescribed"}
                 </p>
               </div>
             )}
 
-            <Button
-              type="button"
-              variant="cream"
-              size="touch"
-              className="relative z-20 mt-4 w-full text-xl font-extrabold"
-              onClick={handleToggleMedicine}
-            >
-              {isMedicineTaken ? (
-                <>
-                  <RefreshCw size={20} className="mr-2" /> MARK AS NOT TAKEN
-                </>
-              ) : (
-                <>
-                  TAKE MEDICINE <ArrowRight size={24} aria-hidden="true" />
-                </>
-              )}
-            </Button>
+            {hasMedication ? (
+              <Button
+                type="button"
+                variant="cream"
+                size="touch"
+                className="relative z-20 mt-4 w-full text-xl font-extrabold"
+                onClick={handleToggleMedicine}
+              >
+                {isMedicineTaken ? (
+                  <>
+                    <RefreshCw size={20} className="mr-2" /> MARK AS NOT TAKEN
+                  </>
+                ) : (
+                  <>
+                    TAKE MEDICINE <ArrowRight size={24} aria-hidden="true" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Link
+                to="/medication"
+                className="relative z-20 mt-4 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-cream text-ink text-lg font-bold hover:bg-cream/90 transition text-center"
+              >
+                VIEW MEDICATION SCHEDULE <ArrowRight size={20} />
+              </Link>
+            )}
           </article>
 
-          {/* Memories Card */}
+          {/* Real Database-Backed Memories Card */}
           <Link
             to="/memories"
-            className="group min-h-96 overflow-hidden rounded-2xl bg-surface text-cream shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-card-active flex flex-col justify-between"
+            className="group min-h-96 overflow-hidden rounded-2xl bg-surface text-cream shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-card-active flex flex-col justify-between border border-clay"
           >
             <div className="p-7 pb-4 sm:p-10 sm:pb-5">
               <div className="flex items-center gap-3 text-xl font-extrabold uppercase text-sun">
-                <Brain size={32} aria-hidden="true" /> My Memories
+                <Heart size={32} aria-hidden="true" /> My Memories
               </div>
               <h2 className="mt-4 font-display text-4xl font-bold">
-                The people and places you love
+                {hasMemories && latestMemory
+                  ? latestMemory.title
+                  : "The people and places you love"}
               </h2>
+              {hasMemories && latestMemory && (
+                <p className="mt-2 text-cream/70 text-base line-clamp-1">
+                  {latestMemory.description}
+                </p>
+              )}
             </div>
-            <img
-              src={memoryPhotos}
-              alt="Family members and familiar hillside home"
-              loading="lazy"
-              width={1536}
-              height={768}
-              className="h-44 w-full object-cover"
-            />
+
+            {hasMemories && coverImage ? (
+              <img
+                src={coverImage}
+                alt={latestMemory?.title || "Family memory photo"}
+                loading="lazy"
+                className="h-44 w-full object-cover border-y border-clay/60"
+              />
+            ) : hasMemories ? (
+              <div className="h-44 w-full bg-ink/60 border-y border-clay/60 flex items-center justify-center text-center p-4">
+                <p className="text-cream/70 text-sm max-w-xs">
+                  {latestMemory?.description || "Cherished family recollections"}
+                </p>
+              </div>
+            ) : (
+              <div className="h-44 w-full bg-ink/40 border-y border-clay/50 flex flex-col items-center justify-center text-center p-4">
+                <span className="flex size-12 items-center justify-center rounded-full bg-clay/50 text-cream/60 mb-2">
+                  <Heart size={24} />
+                </span>
+                <p className="text-cream/80 font-bold text-base">Your memories will appear here</p>
+                <p className="text-cream/60 text-xs mt-0.5">No memories added yet. Click to view or create your first memory.</p>
+              </div>
+            )}
+
             <div className="flex min-h-20 items-center justify-between px-7 text-xl font-extrabold text-sun sm:px-10 border-t border-clay/50">
-              <span>EXPLORE MEMORIES</span>
+              <span>{hasMemories ? "EXPLORE MEMORIES" : "CREATE FIRST MEMORY"}</span>
               <ArrowRight
                 className="transition-transform group-hover:translate-x-2"
                 aria-hidden="true"

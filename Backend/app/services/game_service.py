@@ -195,6 +195,8 @@ def record_game_session(
         db.add(session)
         db.commit()
         db.refresh(session)
+        is_won = session.accuracy >= 60.0 or session.score >= 40
+        session.next_level_unlocked = min(10, session.level_achieved + 1) if is_won else session.level_achieved
         return session
     except Exception:
         db.rollback()
@@ -220,6 +222,46 @@ def get_patient_game_sessions(
         query = query.where(GameSession.game_type == game_type)
 
     return list(db.scalars(query).all())
+
+
+def get_patient_game_progress(
+    db: Session,
+    patient_id: UUID,
+) -> dict[str, dict]:
+    """Calculate the unlocked level and best score for each game played by the patient."""
+    sessions = db.scalars(
+        select(GameSession)
+        .where(GameSession.patient_id == patient_id)
+        .order_by(GameSession.completed_at.asc())
+    ).all()
+
+    progress_map: dict[str, dict] = {}
+
+    for s in sessions:
+        gid = s.game_id or s.game_type
+        # A level is considered won/completed if accuracy >= 60% or score >= 40
+        is_won = s.accuracy >= 60.0 or s.score >= 40
+
+        if gid not in progress_map:
+            progress_map[gid] = {
+                "game_id": gid,
+                "highest_level_won": s.level_achieved if is_won else 0,
+                "current_unlocked_level": min(10, s.level_achieved + 1) if is_won else 1,
+                "best_score": s.score,
+                "total_played": 1,
+                "last_played": s.completed_at,
+            }
+        else:
+            prog = progress_map[gid]
+            prog["total_played"] += 1
+            prog["last_played"] = s.completed_at
+            if s.score > prog["best_score"]:
+                prog["best_score"] = s.score
+            if is_won and s.level_achieved >= prog["highest_level_won"]:
+                prog["highest_level_won"] = s.level_achieved
+                prog["current_unlocked_level"] = min(10, s.level_achieved + 1)
+
+    return progress_map
 
 
 def get_patient_game_summary(
@@ -251,11 +293,32 @@ def get_patient_game_summary(
     total_duration = sum(s.duration_seconds for s in sessions)
     games_played = sorted(list({s.game_type for s in sessions}))
 
+    # Map sessions with next_level_unlocked populated
+    formatted_sessions = []
+    for s in sessions[:5]:
+        is_won = s.accuracy >= 60.0 or s.score >= 40
+        s_dict = {
+            "id": s.id,
+            "patient_id": s.patient_id,
+            "game_type": s.game_type,
+            "game_id": s.game_id,
+            "score": s.score,
+            "accuracy": s.accuracy,
+            "duration_seconds": s.duration_seconds,
+            "difficulty": s.difficulty,
+            "level_achieved": s.level_achieved,
+            "next_level_unlocked": min(10, s.level_achieved + 1) if is_won else s.level_achieved,
+            "metrics": s.metrics,
+            "completed_at": s.completed_at,
+            "created_at": s.created_at,
+        }
+        formatted_sessions.append(s_dict)
+
     return {
         "total_sessions": total_sessions,
         "average_score": round(avg_score, 2),
         "average_accuracy": round(avg_accuracy, 2),
         "total_duration_seconds": total_duration,
         "games_played": games_played,
-        "recent_sessions": list(sessions[:5]),
+        "recent_sessions": formatted_sessions,
     }

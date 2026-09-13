@@ -118,10 +118,9 @@ export const voiceApi = {
     try {
       const query = new URLSearchParams({ language: languageCode });
       if (patientId) query.set("patient_id", patientId);
-      const res = await fetch(`/api/v1/voice/reminders-dictation?${query.toString()}`);
-      if (res.ok) {
-        return (await res.json()) as RemindersDictationResponse;
-      }
+      return await apiClient.get<RemindersDictationResponse>(
+        `/voice/reminders-dictation?${query.toString()}`,
+      );
     } catch (err) {
       console.warn("Failed to fetch reminders dictation:", err);
     }

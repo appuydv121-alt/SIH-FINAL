@@ -20,4 +20,20 @@ export const gamesApi = {
 
   getGameSummary: (patientId: string) =>
     apiClient.get<GameSummary>(`/games/sessions/patient/${patientId}/summary`),
+
+  getPatientGameProgress: (patientId: string) =>
+    apiClient.get<{ patient_id: string; games: Record<string, any> }>(
+      `/games/sessions/patient/${patientId}/progress`,
+    ),
+
+  getAssignedGames: (patientId: string) =>
+    apiClient.get<{ patient_id: string; assigned_game_types: string[] }>(
+      `/games/patient/${patientId}/assigned`,
+    ),
+
+  assignGames: (patientId: string, assigned_game_types: string[]) =>
+    apiClient.post<{ status: string; patient_id: string; assigned_game_types: string[] }>(
+      `/games/patient/${patientId}/assign`,
+      { assigned_game_types },
+    ),
 };

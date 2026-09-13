@@ -1,6 +1,7 @@
 /**
- * Local patient store — persists caregiver-entered patient data to localStorage.
- * Falls back to a built-in mock patient when nothing is stored.
+ * Local patient store — persists caregiver-entered patient data safely.
+ * Uses lightweight localStorage for patient state & metadata, and IndexedDB for heavy media/photos.
+ * Handles QuotaExceededError and corrupted data gracefully.
  */
 
 export interface PatientMemory {
@@ -9,7 +10,7 @@ export interface PatientMemory {
   relationship: string;
   category: string;
   description: string;
-  photoUrl?: string; // data-URL or blob-URL for family photos
+  photoUrl?: string; // Light URL, thumbnail, or IndexedDB reference
 }
 
 export interface PatientMedication {
@@ -50,6 +51,8 @@ export interface PatientProgress {
 export interface PatientData {
   id: string;
   name: string;
+  email?: string;
+  password?: string;
   age: string;
   gender: string;
   phone: string;
@@ -69,99 +72,222 @@ export interface PatientData {
 }
 
 const KEY = "nermemorycare_patient";
+const DB_NAME = "NERMemoryCareDB";
+const MEDIA_STORE = "patient_media";
 
-/** Default demo patient used when nothing has been saved by the caregiver. */
-const MOCK_PATIENT: PatientData = {
-  id: "p_demo_lalita",
-  name: "Lalita Devi",
-  age: "72",
+// In-memory fallback if localStorage is completely disabled or full
+let memoryCache: PatientData | null = null;
+
+const EMPTY_PATIENT: PatientData = {
+  id: "",
+  name: "",
+  age: "",
   gender: "Female",
-  phone: "+91 98765 43210",
-  address: "B-14, Laxmi Nagar, New Delhi",
-  emergencyContactName: "Rahul Verma (Son)",
-  emergencyContact: "+91 98765 43211",
-  doctorName: "Dr. Ananya Sharma",
+  phone: "",
+  address: "",
+  emergencyContactName: "",
+  emergencyContact: "",
+  doctorName: "",
   preferredLanguage: "Hindi",
-  prescriptions: [
-    {
-      id: "rx_1",
-      medicineName: "Donepezil",
-      dosage: "5 mg",
-      instructions: "Take after breakfast",
-      startDate: "2025-01-10",
-      endDate: "",
-      doctorName: "Dr. Ananya Sharma",
-    },
-    {
-      id: "rx_2",
-      medicineName: "Memantine",
-      dosage: "10 mg",
-      instructions: "Take at bedtime",
-      startDate: "2025-03-01",
-      endDate: "",
-      doctorName: "Dr. Ananya Sharma",
-    },
-  ],
-  medications: [
-    { id: "ms_1", medicineName: "Donepezil", dosage: "5 mg", time: "08:00", status: "pending" },
-    { id: "ms_2", medicineName: "Memantine", dosage: "10 mg", time: "21:00", status: "pending" },
-  ],
-  tasks: [
-    { id: "t_1", title: "Morning Walk", description: "30 min walk in the park", time: "07:00", status: "pending" },
-    { id: "t_2", title: "Memory Games", description: "Play CuCove brain games", time: "10:00", status: "pending" },
-    { id: "t_3", title: "Evening Prayer", description: "Temple visit or home prayer", time: "18:00", status: "pending" },
-  ],
-  memories: [
-    {
-      id: "mem_1",
-      title: "Grandchildren Arjun & Mira",
-      relationship: "Grandchildren",
-      category: "family",
-      description: "Arjun loves cricket, Mira loves painting. They visit every Sunday.",
-    },
-    {
-      id: "mem_2",
-      title: "Shimla Garden House",
-      relationship: "",
-      category: "places",
-      description: "The old hill house with marigolds and pine trees.",
-    },
-  ],
-  joinedAt: "2025-01-10",
+  prescriptions: [],
+  medications: [],
+  tasks: [],
+  memories: [],
+  joinedAt: "",
   status: "active",
   progress: {
-    overallScore: 72,
-    medicationAdherence: 85,
-    taskCompletion: 60,
-    gamePerformance: 68,
-    trend: "improving",
-    confidence: 0.78,
+    overallScore: 0,
+    medicationAdherence: 0,
+    taskCompletion: 0,
+    gamePerformance: 0,
+    trend: "stable",
+    confidence: 0,
   },
-  dailyScores: [65, 68, 70, 72, 69, 74, 72],
+  dailyScores: [],
 };
 
+// ─── IndexedDB Media Storage for Heavy Photos ──────────────────────────────
+
+function openIndexedDB(): Promise<IDBDatabase | null> {
+  if (typeof window === "undefined" || !window.indexedDB) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = (e) => {
+        const db = (e.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains(MEDIA_STORE)) {
+          db.createObjectStore(MEDIA_STORE, { keyPath: "id" });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+export async function saveMediaToIndexedDB(id: string, dataUrl: string): Promise<void> {
+  if (!dataUrl || dataUrl.length < 100) return;
+  try {
+    const db = await openIndexedDB();
+    if (!db) return;
+    const tx = db.transaction(MEDIA_STORE, "readwrite");
+    const store = tx.objectStore(MEDIA_STORE);
+    store.put({ id, data: dataUrl, timestamp: Date.now() });
+  } catch {
+    // Ignore IndexedDB write failure
+  }
+}
+
+export async function getMediaFromIndexedDB(id: string): Promise<string | null> {
+  try {
+    const db = await openIndexedDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(MEDIA_STORE, "readonly");
+      const store = tx.objectStore(MEDIA_STORE);
+      const req = store.get(id);
+      req.onsuccess = () => resolve(req.result ? req.result.data : null);
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+// ─── Sanitize & Compact Payload for LocalStorage ───────────────────────────
+
+/**
+ * Strips excessively large base64 strings (>50KB) from memories and offloads them to IndexedDB
+ * to ensure localStorage stays tiny (<100KB) and never hits the 5MB quota.
+ */
+function sanitizePatientForStorage(patient: PatientData): PatientData {
+  const sanitizedMemories = (patient.memories || []).map((m) => {
+    if (m.photoUrl && m.photoUrl.startsWith("data:") && m.photoUrl.length > 50000) {
+      // Save full photo to IndexedDB asynchronously
+      saveMediaToIndexedDB(m.id, m.photoUrl);
+      // Keep only metadata in localStorage to prevent quota exhaustion
+      return {
+        ...m,
+        photoUrl: "", // Keep photoUrl empty in localStorage, loaded via IndexedDB if needed
+      };
+    }
+    return m;
+  });
+
+  return {
+    ...patient,
+    memories: sanitizedMemories,
+    // Cap dailyScores to last 30 entries
+    dailyScores: (patient.dailyScores || []).slice(-30),
+  };
+}
+
+// ─── Patient Store Public API ──────────────────────────────────────────────
+
 export function getPatient(): PatientData {
-  if (typeof window === "undefined") return MOCK_PATIENT;
+  if (typeof window === "undefined") return EMPTY_PATIENT;
+  if (memoryCache) return memoryCache;
+
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw) as PatientData;
+    if (raw) {
+      const parsed = JSON.parse(raw) as PatientData;
+      if (parsed && typeof parsed === "object" && parsed.id) {
+        memoryCache = parsed;
+        return parsed;
+      }
+    }
   } catch {
-    // corrupted data — fall back
+    // If corrupted, clean up key safely
+    try {
+      localStorage.removeItem(KEY);
+    } catch {}
   }
-  return MOCK_PATIENT;
+
+  return EMPTY_PATIENT;
 }
 
 export function savePatient(patient: PatientData): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(patient));
+
+  // Always keep in-memory cache updated immediately
+  memoryCache = patient;
+
+  const sanitized = sanitizePatientForStorage(patient);
+
+  try {
+    localStorage.setItem(KEY, JSON.stringify(sanitized));
+  } catch (error: any) {
+    // Check if error is QuotaExceededError
+    const isQuotaError =
+      error?.name === "QuotaExceededError" ||
+      error?.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
+      error?.code === 22 ||
+      error?.code === 1014 ||
+      (error?.message && error.message.includes("quota"));
+
+    if (isQuotaError) {
+      console.warn("localStorage quota exceeded when saving patient. Running quota recovery cleanup...");
+
+      try {
+        // Recovery Strategy 1: Clear old oversized keys that might be filling up localStorage
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith("temp_") || k.startsWith("cache_") || k.includes("mock") || k.includes("backup"))) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach((k) => {
+          try {
+            localStorage.removeItem(k);
+          } catch {}
+        });
+
+        // Recovery Strategy 2: Strip ALL memory images and non-critical history
+        const minimalPatient: PatientData = {
+          ...sanitized,
+          memories: (sanitized.memories || []).map((m) => ({ ...m, photoUrl: undefined })),
+          dailyScores: (sanitized.dailyScores || []).slice(-7),
+        };
+
+        localStorage.setItem(KEY, JSON.stringify(minimalPatient));
+        console.info("Patient saved successfully with compact storage.");
+      } catch (retryErr) {
+        console.error("Secondary storage fallback utilized due to persistent browser quota limit.", retryErr);
+        try {
+          sessionStorage.setItem(KEY, JSON.stringify(sanitized));
+        } catch {}
+      }
+    } else {
+      console.error("Failed to save patient to localStorage:", error);
+    }
+  }
 }
 
 export function clearPatient(): void {
+  memoryCache = null;
   if (typeof window === "undefined") return;
-  localStorage.removeItem(KEY);
+  try {
+    localStorage.removeItem(KEY);
+    sessionStorage.removeItem(KEY);
+  } catch {}
 }
 
 export function hasCustomPatient(): boolean {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem(KEY);
+  if (memoryCache && memoryCache.id) return true;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw) as PatientData;
+    return !!(parsed && parsed.id);
+  } catch {
+    return false;
+  }
 }

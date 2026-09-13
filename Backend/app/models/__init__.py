@@ -1,5 +1,6 @@
 from app.models.assessment import CognitiveAssessment
-from app.models.game import GameSession
+from app.models.game import GameAssignment, GameSession
+from app.models.memory import Memory
 from app.models.medication import (
     MedicationFrequency,
     MedicationLog,
@@ -48,5 +49,7 @@ __all__ = [
     "TaskRecurrence",
     "TaskStatus",
     "GameSession",
+    "GameAssignment",
     "CognitiveAssessment",
+    "Memory",
 ]

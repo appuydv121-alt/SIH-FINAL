@@ -19,7 +19,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { login, demoLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -59,27 +59,6 @@ function LoginPage() {
     }
   };
 
-  const handleDemo = async (role: "patient" | "caretaker" | "doctor") => {
-    setErrorMessage(null);
-    setIsLoading(true);
-    try {
-      const user = await demoLogin(role);
-      if (user.role === "caretaker") {
-        navigate({ to: "/caregiver" });
-      } else if (user.role === "doctor") {
-        navigate({ to: "/doctor" });
-      } else {
-        navigate({ to: "/" });
-      }
-    } catch (err: unknown) {
-      setErrorMessage(
-        formatApiError(err, "Demo sign-in failed. Please verify the backend server is active."),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <BackendStatusBanner />
@@ -92,52 +71,11 @@ function LoginPage() {
         </Link>
         <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Welcome Back</h1>
         <p className="mt-2 text-base text-cream/70">
-          Sign in to access your daily companion, medicine, and care plans.
+          Sign in with your registered account credentials.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4">
-        {/* Quick Demo Logins Box */}
-        <div className="mb-6 rounded-2xl border-2 border-sun/40 bg-surface/80 p-5 shadow-card">
-          <p className="text-xs font-extrabold uppercase tracking-wider text-sun mb-3 text-center">
-            ⚡ Quick 1-Click Demo Profiles (Pre-Configured)
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleDemo("patient")}
-              className="flex flex-col items-center justify-center p-3 rounded-xl border border-clay bg-ink text-cream hover:bg-sun hover:text-ink transition duration-200 text-center"
-            >
-              <User size={22} className="mb-1 text-sun" />
-              <span className="text-xs font-bold">Lalita</span>
-              <span className="text-[10px] opacity-70">Patient</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleDemo("caretaker")}
-              className="flex flex-col items-center justify-center p-3 rounded-xl border border-clay bg-ink text-cream hover:bg-sun hover:text-ink transition duration-200 text-center"
-            >
-              <Users size={22} className="mb-1 text-tea-confirm" />
-              <span className="text-xs font-bold">Rahul</span>
-              <span className="text-[10px] opacity-70">Caregiver</span>
-            </button>
-
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleDemo("doctor")}
-              className="flex flex-col items-center justify-center p-3 rounded-xl border border-clay bg-ink text-cream hover:bg-sun hover:text-ink transition duration-200 text-center"
-            >
-              <Stethoscope size={22} className="mb-1 text-fire" />
-              <span className="text-xs font-bold">Dr. Sharma</span>
-              <span className="text-[10px] opacity-70">Doctor</span>
-            </button>
-          </div>
-        </div>
-
         {/* Credentials Login Form */}
         <div className="rounded-2xl border border-clay bg-surface p-8 shadow-card">
           {errorMessage && (

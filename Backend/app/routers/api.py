@@ -14,6 +14,7 @@ from app.routers.caretakers import router as caretakers_router
 from app.routers.doctors import router as doctors_router
 from app.routers.games import router as games_router
 from app.routers.medications import router as medications_router
+from app.routers.memories import router as memories_router
 from app.routers.notification import router as notifications_router
 from app.routers.patients import router as patients_router
 from app.routers.prescriptions import router as prescriptions_router
@@ -35,6 +36,7 @@ api_router.include_router(prescriptions_router)
 api_router.include_router(medications_router)
 api_router.include_router(notifications_router)
 api_router.include_router(tasks_router)
+api_router.include_router(memories_router)
 api_router.include_router(games_router)
 api_router.include_router(analytics_router)
 api_router.include_router(voice_router)

@@ -87,13 +87,13 @@ def create_new_prescription(
     db: DBSession,
     current_user: User = Depends(get_current_user),
 ):
-    if current_user.role != UserRole.DOCTOR:
+    if current_user.role not in (UserRole.DOCTOR, UserRole.CARETAKER, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors can create prescriptions",
+            detail="Only doctors or authorized caregivers can create prescriptions",
         )
 
-    if not doctor_has_patient_access(
+    if current_user.role == UserRole.DOCTOR and not doctor_has_patient_access(
         db,
         current_user.id,
         data.patient_id,
@@ -101,6 +101,15 @@ def create_new_prescription(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Doctor is not assigned to this patient",
+        )
+    elif current_user.role == UserRole.CARETAKER and not caretaker_has_patient_access(
+        db,
+        current_user.id,
+        data.patient_id,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Caretaker is not assigned to this patient",
         )
 
     try:

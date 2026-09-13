@@ -24,7 +24,6 @@ const TABS = [
   'Medications',
   'Tasks',
   'Progress',
-  'Games',
   'Questionnaire',
 ]
 
@@ -324,45 +323,6 @@ export default function PatientProfile() {
                 <p className="text-xs text-ink/50 mt-2">Positive cognitive stimulus</p>
               </Card>
             </div>
-          </div>
-        )}
-
-        {/* GAMES */}
-        {activeTab === 'Games' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-ink">Cognitive Game Sessions</h3>
-              <span className="text-xs text-ink/60 font-medium">{games.length} sessions logged</span>
-            </div>
-            {games.length === 0 ? (
-              <Card>
-                <p className="text-sm text-ink/60 text-center py-4">No game sessions logged yet</p>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                {games.map((session) => (
-                  <Card key={session.id}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3.5">
-                        <div className="p-3 bg-sun/20 text-sun rounded-xl flex-shrink-0">
-                          <Gamepad2 className="w-5 h-5 text-sun" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-ink text-sm">{session.gameName}</h4>
-                          <p className="text-xs text-ink/60 mt-0.5">
-                            Duration: {Math.floor(session.durationSeconds / 60)}m {session.durationSeconds % 60}s
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-base font-bold text-fire">{session.score} pts</p>
-                        <p className="text-xs text-tea-confirm font-medium">{session.accuracy}% accuracy</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )}
           </div>
         )}
 

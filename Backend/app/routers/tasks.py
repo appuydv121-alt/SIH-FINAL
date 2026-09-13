@@ -94,10 +94,18 @@ def create_new_task(
     if current_user.role not in (
         UserRole.DOCTOR,
         UserRole.CARETAKER,
+        UserRole.PATIENT,
+        UserRole.ADMIN,
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors or caretakers can create tasks",
+            detail="Unauthorized to create tasks",
+        )
+
+    if current_user.role == UserRole.PATIENT and data.patient_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Patients can only create routines for themselves",
         )
 
     verify_patient_access(
@@ -215,10 +223,12 @@ def update_existing_task(
     if current_user.role not in (
         UserRole.DOCTOR,
         UserRole.CARETAKER,
+        UserRole.PATIENT,
+        UserRole.ADMIN,
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors or caretakers can update tasks",
+            detail="Unauthorized to update tasks",
         )
 
     return update_task(
@@ -257,10 +267,12 @@ def complete_existing_task(
     if current_user.role not in (
         UserRole.PATIENT,
         UserRole.CARETAKER,
+        UserRole.DOCTOR,
+        UserRole.ADMIN,
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the patient or caretaker can complete a task",
+            detail="Unauthorized to complete task",
         )
 
     return complete_task(
@@ -298,10 +310,12 @@ def reset_existing_task(
     if current_user.role not in (
         UserRole.DOCTOR,
         UserRole.CARETAKER,
+        UserRole.PATIENT,
+        UserRole.ADMIN,
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors or caretakers can reset tasks",
+            detail="Unauthorized to reset tasks",
         )
 
     return reset_task(
@@ -339,10 +353,12 @@ def delete_existing_task(
     if current_user.role not in (
         UserRole.DOCTOR,
         UserRole.CARETAKER,
+        UserRole.PATIENT,
+        UserRole.ADMIN,
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors or caretakers can delete tasks",
+            detail="Unauthorized to delete tasks",
         )
 
     delete_task(

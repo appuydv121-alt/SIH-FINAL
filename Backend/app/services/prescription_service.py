@@ -49,9 +49,9 @@ def create_prescription(
     data: PrescriptionCreate,
 ) -> Prescription:
 
-    if doctor.role != UserRole.DOCTOR:
+    if doctor.role not in (UserRole.DOCTOR, UserRole.CARETAKER, UserRole.ADMIN):
         raise ValueError(
-            "Only doctors can create prescriptions"
+            "Only doctors or authorized caregivers can create prescriptions"
         )
 
     if data.end_date and data.end_date < data.start_date:

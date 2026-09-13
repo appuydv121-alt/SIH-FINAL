@@ -71,9 +71,9 @@ def create_schedule(
     data: MedicationScheduleCreate,
 ) -> MedicationSchedule:
 
-    if doctor.role != UserRole.DOCTOR:
+    if doctor.role not in (UserRole.DOCTOR, UserRole.CARETAKER, UserRole.ADMIN):
         raise ValueError(
-            "Only doctors can create medication schedules"
+            "Only doctors or authorized caregivers can create medication schedules"
         )
 
     prescription = db.get(
@@ -86,7 +86,7 @@ def create_schedule(
             "Prescription not found"
         )
 
-    if prescription.doctor_id != doctor.id:
+    if doctor.role == UserRole.DOCTOR and prescription.doctor_id != doctor.id:
         raise ValueError(
             "Only the prescribing doctor can create "
             "a schedule for this prescription"
@@ -219,6 +219,32 @@ def get_patient_medication_logs(
     patient_id: UUID,
     target_date: date | None = None,
 ) -> list[MedicationLog]:
+
+    # If querying today's logs, ensure every active schedule has a log entry for today
+    if target_date == date.today():
+        schedules = get_patient_schedules(db, patient_id, date.today())
+        start_utc = datetime.combine(date.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+        
+        for s in schedules:
+            existing_log = db.scalar(
+                select(MedicationLog).where(
+                    MedicationLog.schedule_id == s.id,
+                    MedicationLog.scheduled_at >= start_utc,
+                )
+            )
+            if not existing_log:
+                sched_dt = datetime.combine(date.today(), s.scheduled_time).replace(tzinfo=timezone.utc)
+                new_log = MedicationLog(
+                    schedule_id=s.id,
+                    patient_id=patient_id,
+                    scheduled_at=sched_dt,
+                    status=MedicationLogStatus.SCHEDULED,
+                )
+                db.add(new_log)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
 
     statement = select(
         MedicationLog

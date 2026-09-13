@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   BarChart3,
   ArrowLeft,
@@ -34,7 +35,14 @@ export const Route = createFileRoute("/analytics")({
 
 function AnalyticsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { latestAssessment, trends, isLoading, isAssessing, triggerAssessment } = useAnalytics();
+
+  useEffect(() => {
+    if (user && user.role === "patient") {
+      navigate({ to: "/" });
+    }
+  }, [user, navigate]);
 
   const handleRunAssessment = async () => {
     try {

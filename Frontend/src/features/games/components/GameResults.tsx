@@ -1,4 +1,4 @@
-import { Trophy, RotateCcw, Home, CloudOff, CheckCircle2 } from "lucide-react";
+import { Trophy, RotateCcw, Home, CloudOff, CheckCircle2, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { formatDuration } from "../utils/gameMetrics";
@@ -8,10 +8,12 @@ interface GameResultsProps {
   accuracy: number;
   durationSeconds: number;
   level: number;
+  maxLevel?: number;
   gameName: string;
   synced: boolean;
   offline: boolean;
   onPlayAgain: () => void;
+  onNextLevel?: () => void;
 }
 
 export function GameResults({
@@ -19,19 +21,34 @@ export function GameResults({
   accuracy,
   durationSeconds,
   level,
+  maxLevel = 10,
   gameName,
   synced,
   offline,
   onPlayAgain,
+  onNextLevel,
 }: GameResultsProps) {
+  const isWon = accuracy >= 60 || score >= 50;
+  const hasNextLevel = isWon && level < maxLevel;
+
   const grade =
     score >= 90
-      ? "Excellent!"
+      ? "Outstanding! Level Completed!"
       : score >= 70
-        ? "Great Job!"
+        ? "Great Job! Level Unlocked!"
         : score >= 50
-          ? "Good Effort!"
+          ? "Good Effort! Level Won!"
           : "Keep Practising!";
+
+  const handleNextLevel = () => {
+    if (onNextLevel) {
+      onNextLevel();
+    } else {
+      const url = new URL(window.location.href);
+      url.searchParams.set("level", String(level + 1));
+      window.location.href = url.toString();
+    }
+  };
 
   return (
     <div className="animate-in fade-in zoom-in-95 duration-300 rounded-2xl border border-clay bg-surface p-8 shadow-card flex flex-col items-center text-center max-w-md mx-auto">
@@ -73,30 +90,43 @@ export function GameResults({
       ) : synced ? (
         <div className="flex items-center gap-2 rounded-lg border border-tea-confirm/40 bg-tea-confirm/10 px-4 py-2 text-sm text-cream/80 mb-5 w-full">
           <CheckCircle2 size={16} className="text-tea-confirm shrink-0" />
-          <span>Cognitive performance recorded successfully.</span>
+          <span>Cognitive performance recorded & level progressed!</span>
         </div>
       ) : null}
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <Button
-          onClick={onPlayAgain}
-          variant="cream"
-          size="touch"
-          className="flex-1 text-base font-extrabold"
-        >
-          <RotateCcw size={18} className="mr-2" /> Play Again
-        </Button>
-        <Button
-          asChild
-          variant="ghost"
-          size="touch"
-          className="flex-1 border border-clay text-cream hover:bg-clay"
-        >
-          <Link to="/games">
-            <Home size={18} className="mr-2" /> All Games
-          </Link>
-        </Button>
+      <div className="flex flex-col gap-3 w-full">
+        {hasNextLevel && (
+          <Button
+            onClick={handleNextLevel}
+            variant="sun"
+            size="touch"
+            className="w-full text-base font-extrabold shadow-md bg-sun text-ink hover:bg-sun/90"
+          >
+            Next Level (Level {level + 1}) <ArrowRight size={18} className="ml-2" />
+          </Button>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <Button
+            onClick={onPlayAgain}
+            variant="cream"
+            size="touch"
+            className="flex-1 text-sm font-extrabold"
+          >
+            <RotateCcw size={16} className="mr-2" /> Play Again
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            size="touch"
+            className="flex-1 border border-clay text-cream hover:bg-clay text-sm"
+          >
+            <Link to="/games">
+              <Home size={16} className="mr-2" /> All Games
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
