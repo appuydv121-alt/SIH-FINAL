@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import brainLogo from '../../assets/brain-logo.png'
 
 export default function PatientLogin() {
   const navigate = useNavigate()
@@ -33,8 +34,8 @@ export default function PatientLogin() {
         </button>
 
         {/* Logo & Header */}
-        <div className="w-14 h-14 bg-sun rounded-2xl flex items-center justify-center text-ink mb-4 shadow-sm">
-          <User className="w-8 h-8" />
+        <div className="w-14 h-14 rounded-2xl overflow-hidden mb-4 shadow-sm border-2 border-sun/30">
+          <img src={brainLogo} alt="SmritiSetu Logo" className="w-full h-full object-contain" />
         </div>
         <h2 className="text-3xl font-bold text-cream">Welcome</h2>
         <p className="text-base text-cream/60 mt-1 mb-6">

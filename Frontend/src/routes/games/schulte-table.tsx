@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/schulte-table")({
   }),
   head: () => ({
     meta: [
-      { title: "Schulte Table | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Schulte Table | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: SchulteTablePage,

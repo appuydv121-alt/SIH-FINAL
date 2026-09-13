@@ -87,13 +87,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "CuCove" },
+      { title: "SmritiSetu" },
       {
         name: "description",
         content: "A warm daily companion for memories, medicine, and routines.",
       },
-      { name: "author", content: "CuCove" },
-      { property: "og:title", content: "CuCove" },
+      { name: "author", content: "SmritiSetu" },
+      { property: "og:title", content: "SmritiSetu" },
       {
         property: "og:description",
         content: "A warm daily companion for memories, medicine, and routines.",

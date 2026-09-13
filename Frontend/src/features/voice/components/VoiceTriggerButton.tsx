@@ -30,11 +30,11 @@ export function VoiceTriggerButton({
       setIsOpen(false);
     };
 
-    window.addEventListener("cucove:open-voice", handleOpenEvent);
-    window.addEventListener("cucove:close-voice", handleCloseEvent);
+    window.addEventListener("smritisetu:open-voice", handleOpenEvent);
+    window.addEventListener("smritisetu:close-voice", handleCloseEvent);
     return () => {
-      window.removeEventListener("cucove:open-voice", handleOpenEvent);
-      window.removeEventListener("cucove:close-voice", handleCloseEvent);
+      window.removeEventListener("smritisetu:open-voice", handleOpenEvent);
+      window.removeEventListener("smritisetu:close-voice", handleCloseEvent);
     };
   }, []);
 

@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useGames } from "@/hooks/use-games";
 import type { GameSessionSubmit } from "../types/game.types";
 
-const PENDING_KEY = "cucove_pending_game_sessions";
+const PENDING_KEY = "smritisetu_pending_game_sessions";
 
 interface PendingSession {
   data: GameSessionSubmit;

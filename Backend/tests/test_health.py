@@ -3,4 +3,4 @@ def test_health_check(client):
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
-    assert "NER-MemoryCare backend is running" in data["message"]
+    assert "SmritiSetu backend is running" in data["message"]

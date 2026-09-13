@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/anagram-solver")({
   }),
   head: () => ({
     meta: [
-      { title: "Anagram Solver | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Anagram Solver | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: AnagramSolverPage,

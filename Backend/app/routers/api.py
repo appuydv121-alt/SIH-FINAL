@@ -1,5 +1,5 @@
 """
-Central Merged API Router for CuCove (NER-MemoryCare)
+Central Merged API Router for SmritiSetu (NER-MemoryCare)
 Combines and mounts all 14 domain sub-routers under the `/api/v1` namespace.
 """
 
@@ -59,7 +59,7 @@ def api_health():
 
     return {
         "success": True,
-        "message": "NER-MemoryCare backend is running",
+        "message": "SmritiSetu backend is running",
         "database": db_status,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "1.0.0",

@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/water-jugs")({
   }),
   head: () => ({
     meta: [
-      { title: "Water Jugs | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Water Jugs | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: WaterJugsPage,

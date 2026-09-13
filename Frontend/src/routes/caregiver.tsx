@@ -57,7 +57,7 @@ import { GAME_REGISTRY } from "@/features/games/data/gameRegistry";
 export const Route = createFileRoute("/caregiver")({
   head: () => ({
     meta: [
-      { title: "Caregiver Portal & Patient Monitoring | CuCove" },
+      { title: "Caregiver Portal & Patient Monitoring | SmritiSetu" },
       {
         name: "description",
         content: "Caregiver portal for monitoring assigned patients' medicines, routines, and clinical progress.",

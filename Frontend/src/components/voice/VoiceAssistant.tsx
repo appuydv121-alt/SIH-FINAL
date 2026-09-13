@@ -38,9 +38,9 @@ export const VoiceAssistant: React.FC = () => {
     const handleOpenVoice = () => {
       setIsOpen(true);
     };
-    window.addEventListener("cucove:open-voice", handleOpenVoice);
+    window.addEventListener("smritisetu:open-voice", handleOpenVoice);
     return () => {
-      window.removeEventListener("cucove:open-voice", handleOpenVoice);
+      window.removeEventListener("smritisetu:open-voice", handleOpenVoice);
     };
   }, [setIsOpen]);
 
@@ -124,7 +124,7 @@ export const VoiceAssistant: React.FC = () => {
                     id="voice-modal-title"
                     className="text-lg sm:text-xl font-display font-bold text-cream"
                   >
-                    CuCove Voice Companion
+                    SmritiSetu Voice Companion
                   </h2>
                   <p className="text-xs text-cream/70 font-semibold">
                     Multilingual Voice Navigation & Accessibility

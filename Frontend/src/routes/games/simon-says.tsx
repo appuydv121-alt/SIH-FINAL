@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/simon-says")({
   }),
   head: () => ({
     meta: [
-      { title: "Simon Says | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Simon Says | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: SimonSaysPage,

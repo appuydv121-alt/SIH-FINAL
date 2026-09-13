@@ -35,7 +35,7 @@ export const voiceApi = {
     form.append("mode", "transcribe");
     form.append(
       "prompt",
-      "SmritiSetu CuCove voice commands: games, Memory Match, Number Puzzle, Word Puzzle, reminders, medicine, water, walk, family, doctor, help, routine.",
+      "SmritiSetu voice commands: games, Memory Match, Number Puzzle, Word Puzzle, reminders, medicine, water, walk, family, doctor, help, routine.",
     );
     return apiClient.post<TranscribeResponse>("/voice/transcribe", form);
   },

@@ -97,7 +97,7 @@ def test_voice_synthesize_speech(client):
     # 1. Successful synthesis
     res = client.post(
         "/api/v1/voice/synthesize",
-        json={"text": "Welcome to CuCove", "language_code": "en-IN"},
+        json={"text": "Welcome to SmritiSetu", "language_code": "en-IN"},
     )
     assert res.status_code == 200
     data = res.json()

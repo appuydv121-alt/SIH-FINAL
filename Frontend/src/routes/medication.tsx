@@ -21,10 +21,10 @@ import type { MedicationLogStatus } from "@/types/api";
 export const Route = createFileRoute("/medication")({
   head: () => ({
     meta: [
-      { title: "Medication & Reminders | CuCove" },
+      { title: "Medication & Reminders | SmritiSetu" },
       {
         name: "description",
-        content: "Clear daily medication schedules and dosage logs on CuCove.",
+        content: "Clear daily medication schedules and dosage logs on SmritiSetu.",
       },
     ],
   }),

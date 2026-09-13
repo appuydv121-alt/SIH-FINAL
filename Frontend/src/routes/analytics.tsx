@@ -22,11 +22,11 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "AI Cognitive Analytics | CuCove" },
+      { title: "AI Cognitive Analytics | SmritiSetu" },
       {
         name: "description",
         content:
-          "Cognitive assessment trends, risk evaluations, and AI clinical insights on CuCove.",
+          "Cognitive assessment trends, risk evaluations, and AI clinical insights on SmritiSetu.",
       },
     ],
   }),

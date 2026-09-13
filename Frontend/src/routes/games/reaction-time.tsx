@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/reaction-time")({
   }),
   head: () => ({
     meta: [
-      { title: "Reaction Time | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Reaction Time | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: ReactionTimePage,

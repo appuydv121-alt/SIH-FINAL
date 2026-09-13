@@ -27,13 +27,13 @@ import { translationApi } from "@/api/translation.api";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Home | CuCove" },
+      { title: "Home | SmritiSetu" },
       {
         name: "description",
         content:
           "Lalita's accessible daily home for memory games, medicine, personal memories, and routines.",
       },
-      { property: "og:title", content: "Home | CuCove" },
+      { property: "og:title", content: "Home | SmritiSetu" },
       {
         property: "og:description",
         content: "A warm daily companion for memory games, medicine, and routines.",

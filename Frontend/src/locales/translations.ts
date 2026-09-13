@@ -84,7 +84,7 @@ export const TRANSLATIONS: Record<string, TranslationDict> = {
     "reminders.dismiss": "Dismiss",
     "reminders.complete": "Mark Complete",
     "reminders.permTitle": "Browser Reminder Permissions",
-    "reminders.permDesc": "Enable notifications so CuCove can remind you even when browsing other tabs.",
+    "reminders.permDesc": "Enable notifications so SmritiSetu can remind you even when browsing other tabs.",
     "reminders.permButton": "Enable Notifications",
 
     // Routine Page
@@ -209,7 +209,7 @@ export const TRANSLATIONS: Record<string, TranslationDict> = {
     "reminders.dismiss": "हटाएं",
     "reminders.complete": "पूर्ण चिह्नित करें",
     "reminders.permTitle": "ब्राउज़र रिमाइंडर अनुमति",
-    "reminders.permDesc": "सूचनाएं चालू करें ताकि दूसरे टैब में होने पर भी CuCove आपको याद दिला सके।",
+    "reminders.permDesc": "सूचनाएं चालू करें ताकि दूसरे टैब में होने पर भी SmritiSetu आपको याद दिला सके।",
     "reminders.permButton": "सूचनाएं चालू करें",
 
     // Routine Page

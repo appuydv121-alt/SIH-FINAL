@@ -35,7 +35,7 @@ export function BackendStatusBanner() {
         <div className="flex items-center gap-2">
           <AlertTriangle size={16} className="text-fire shrink-0" />
           <span>
-            <strong>CuCove Server Offline:</strong> Unable to connect to backend service.{" "}
+            <strong>SmritiSetu Server Offline:</strong> Unable to connect to backend service.{" "}
             <span className="opacity-80">({statusMessage || "Connection refused"})</span>
           </span>
         </div>

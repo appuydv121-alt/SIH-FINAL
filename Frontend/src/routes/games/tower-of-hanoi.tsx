@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/tower-of-hanoi")({
   }),
   head: () => ({
     meta: [
-      { title: "Tower Of Hanoi | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Tower Of Hanoi | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: TowerOfHanoiPage,

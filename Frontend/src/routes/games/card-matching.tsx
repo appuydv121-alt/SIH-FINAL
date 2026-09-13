@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/card-matching")({
   }),
   head: () => ({
     meta: [
-      { title: "Card Matching | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Card Matching | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: CardMatchingPage,

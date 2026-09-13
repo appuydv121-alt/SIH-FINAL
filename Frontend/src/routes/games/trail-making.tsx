@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/trail-making")({
   }),
   head: () => ({
     meta: [
-      { title: "Trail Making | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Trail Making | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: TrailMakingPage,

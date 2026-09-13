@@ -26,7 +26,7 @@ import { savePatient, type PatientData } from "@/utils/patientStore";
 export const Route = createFileRoute("/caregiver_/add-patient")({
   head: () => ({
     meta: [
-      { title: "Add or Connect Patient | CuCove Caregiver" },
+      { title: "Add or Connect Patient | SmritiSetu Caregiver" },
       {
         name: "description",
         content: "Streamlined caregiver patient onboarding — personal info, credentials, and medical care details.",

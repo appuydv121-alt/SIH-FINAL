@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/dual-task")({
   }),
   head: () => ({
     meta: [
-      { title: "Dual Task | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Dual Task | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: DualTaskPage,

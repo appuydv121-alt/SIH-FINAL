@@ -36,7 +36,7 @@ export const VoiceTranscript: React.FC<VoiceTranscriptProps> = ({
       {result?.spokenMessage && (
         <div className="rounded-xl border border-clay/60 bg-surface/80 p-3.5 mt-2">
           <span className="text-xs font-bold uppercase tracking-wider text-sun">
-            CuCove Response:
+            SmritiSetu Response:
           </span>
           <p className="text-base sm:text-lg font-medium text-cream mt-1 leading-relaxed">
             {result.spokenMessage}

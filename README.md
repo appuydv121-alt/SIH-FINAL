@@ -1,4 +1,4 @@
-# CuCove & NER-MemoryCare: Full-Stack Cognitive Assistance Platform
+# SmritiSetu & NER-MemoryCare: Full-Stack Cognitive Assistance Platform
 
 A fully integrated, production-grade cognitive assistance platform designed for elderly individuals, cognitive impairment patients, caregivers, and medical practitioners.
 
@@ -7,7 +7,7 @@ A fully integrated, production-grade cognitive assistance platform designed for 
 ## Architecture Overview
 
 ```
-Frontend (CuCove)                          Backend (NER-MemoryCare)
+Frontend (SmritiSetu)                      Backend (NER-MemoryCare)
 React 19 + TanStack Start / Router        FastAPI + Python 3.13 + SQLAlchemy
 Vite + TailwindCSS + Radix UI             Cognitive AI Engine + SQLite/PostgreSQL
 Port: 5173                                Port: 8000
@@ -22,9 +22,9 @@ Port: 5173                                Port: 8000
 
 | Role | Name | Email | Password |
 | :--- | :--- | :--- | :--- |
-| **Patient** | Lalita Devi | `lalita@cucove.com` | `Password123!` |
-| **Caregiver** | Rahul Verma | `caregiver@cucove.com` | `Password123!` |
-| **Doctor** | Dr. Ananya Sharma | `doctor@cucove.com` | `Password123!` |
+| **Patient** | Lalita Devi | `lalita@smritisetu.com` | `Password123!` |
+| **Caregiver** | Rahul Verma | `caregiver@smritisetu.com` | `Password123!` |
+| **Doctor** | Dr. Ananya Sharma | `doctor@smritisetu.com` | `Password123!` |
 
 *(A quick 1-click demo switcher is available on the `/login` screen and inside the top header!)*
 

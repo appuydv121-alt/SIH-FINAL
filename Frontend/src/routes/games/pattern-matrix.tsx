@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/pattern-matrix")({
   }),
   head: () => ({
     meta: [
-      { title: "Pattern Matrix | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Pattern Matrix | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: PatternMatrixPage,

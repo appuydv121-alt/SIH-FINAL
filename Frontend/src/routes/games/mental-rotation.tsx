@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/mental-rotation")({
   }),
   head: () => ({
     meta: [
-      { title: "Mental Rotation | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Mental Rotation | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: MentalRotationPage,

@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/logic-puzzles")({
   }),
   head: () => ({
     meta: [
-      { title: "Logic Puzzles | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Logic Puzzles | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: LogicPuzzlesPage,

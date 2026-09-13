@@ -11,8 +11,8 @@ import { Label } from "../components/ui/label";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign In | CuCove" },
-      { name: "description", content: "Sign in to CuCove cognitive companion platform." },
+      { title: "Sign In | SmritiSetu" },
+      { name: "description", content: "Sign in to SmritiSetu cognitive companion platform." },
     ],
   }),
   component: LoginPage,
@@ -67,7 +67,7 @@ function LoginPage() {
           <span className="flex size-14 items-center justify-center rounded-xl bg-sun text-ink shadow-md">
             <House size={32} strokeWidth={2.5} />
           </span>
-          <span className="font-display text-4xl font-bold text-cream">CuCove</span>
+          <span className="font-display text-4xl font-bold text-cream">SmritiSetu</span>
         </Link>
         <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Welcome Back</h1>
         <p className="mt-2 text-base text-cream/70">

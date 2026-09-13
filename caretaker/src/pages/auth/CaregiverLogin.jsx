@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Users, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import brainLogo from '../../assets/brain-logo.png'
 
 export default function CaregiverLogin() {
   const navigate = useNavigate()
@@ -35,8 +36,8 @@ export default function CaregiverLogin() {
         </button>
 
         {/* Logo & Header */}
-        <div className="w-12 h-12 bg-fire rounded-xl flex items-center justify-center text-cream mb-4 shadow-sm">
-          <Users className="w-6 h-6" />
+        <div className="w-12 h-12 rounded-xl overflow-hidden mb-4 shadow-sm border-2 border-sun/30">
+          <img src={brainLogo} alt="SmritiSetu Logo" className="w-full h-full object-contain" />
         </div>
         <h2 className="text-2xl font-bold text-cream">Caregiver Login</h2>
         <p className="text-sm text-cream/60 mt-1 mb-6">

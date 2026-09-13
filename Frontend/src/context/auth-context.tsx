@@ -72,11 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     if (typeof window !== "undefined") {
-      window.addEventListener("cucove:unauthorized", handleUnauthorized);
+      window.addEventListener("smritisetu:unauthorized", handleUnauthorized);
     }
     return () => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("cucove:unauthorized", handleUnauthorized);
+        window.removeEventListener("smritisetu:unauthorized", handleUnauthorized);
       }
     };
   }, []);

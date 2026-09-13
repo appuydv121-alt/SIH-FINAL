@@ -24,11 +24,11 @@ def seed_data():
         print("🌱 Seeding clinical demo data...")
 
         # 1. Patient: Lalita Devi
-        lalita = db.query(User).filter_by(email="lalita@cucove.com").first()
+        lalita = db.query(User).filter_by(email="lalita@smritisetu.com").first()
         if not lalita:
             lalita = User(
                 name="Lalita Devi",
-                email="lalita@cucove.com",
+                email="lalita@smritisetu.com",
                 password_hash=hash_password("Password123!"),
                 role=UserRole.PATIENT,
                 phone="+91 98765 12345",
@@ -46,14 +46,14 @@ def seed_data():
                 timezone="Asia/Kolkata",
             )
             db.add(patient_profile)
-            print("  ✓ Created Patient: Lalita Devi (lalita@cucove.com / Password123!)")
+            print("  ✓ Created Patient: Lalita Devi (lalita@smritisetu.com / Password123!)")
 
         # 2. Caregiver: Rahul Verma
-        rahul = db.query(User).filter_by(email="caregiver@cucove.com").first()
+        rahul = db.query(User).filter_by(email="caregiver@smritisetu.com").first()
         if not rahul:
             rahul = User(
                 name="Rahul Verma",
-                email="caregiver@cucove.com",
+                email="caregiver@smritisetu.com",
                 password_hash=hash_password("Password123!"),
                 role=UserRole.CARETAKER,
                 phone="+91 98765 43210",
@@ -61,14 +61,14 @@ def seed_data():
             )
             db.add(rahul)
             db.flush()
-            print("  ✓ Created Caregiver: Rahul Verma (caregiver@cucove.com / Password123!)")
+            print("  ✓ Created Caregiver: Rahul Verma (caregiver@smritisetu.com / Password123!)")
 
         # 3. Doctor: Dr. Ananya Sharma
-        doctor = db.query(User).filter_by(email="doctor@cucove.com").first()
+        doctor = db.query(User).filter_by(email="doctor@smritisetu.com").first()
         if not doctor:
             doctor = User(
                 name="Dr. Ananya Sharma",
-                email="doctor@cucove.com",
+                email="doctor@smritisetu.com",
                 password_hash=hash_password("Password123!"),
                 role=UserRole.DOCTOR,
                 phone="+91 91234 56789",
@@ -76,7 +76,7 @@ def seed_data():
             )
             db.add(doctor)
             db.flush()
-            print("  ✓ Created Doctor: Dr. Ananya Sharma (doctor@cucove.com / Password123!)")
+            print("  ✓ Created Doctor: Dr. Ananya Sharma (doctor@smritisetu.com / Password123!)")
 
         # Relationships
         doc_rel = db.query(DoctorPatient).filter_by(doctor_id=doctor.id, patient_id=lalita.id).first()

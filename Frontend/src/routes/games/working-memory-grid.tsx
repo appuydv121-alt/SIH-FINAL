@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/working-memory-grid")({
   }),
   head: () => ({
     meta: [
-      { title: "Working Memory Grid | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Working Memory Grid | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: WorkingMemoryGridPage,

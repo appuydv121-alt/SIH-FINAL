@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/number-sequence")({
   }),
   head: () => ({
     meta: [
-      { title: "Number Sequence | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Number Sequence | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: NumberSequencePage,

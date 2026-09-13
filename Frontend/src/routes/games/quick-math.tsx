@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/quick-math")({
   }),
   head: () => ({
     meta: [
-      { title: "Quick Math | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Quick Math | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: QuickMathPage,

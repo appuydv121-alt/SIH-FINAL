@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/visual-search")({
   }),
   head: () => ({
     meta: [
-      { title: "Visual Search | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Visual Search | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: VisualSearchPage,

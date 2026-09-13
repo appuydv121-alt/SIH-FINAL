@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/stroop")({
   }),
   head: () => ({
     meta: [
-      { title: "Stroop | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Stroop | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: StroopPage,

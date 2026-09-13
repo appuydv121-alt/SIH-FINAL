@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Home, User, Bell, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { mockAlerts } from '../../mockData'
+import brainLogo from '../../assets/brain-logo.png'
 
 const navItems = [
   { to: '/caregiver', label: 'Home', icon: Home, end: true },
@@ -24,11 +25,11 @@ export function Sidebar() {
     <aside className="w-64 bg-surface border-r border-clay/40 h-screen flex flex-col flex-shrink-0 shadow-sm">
       <div className="p-6 border-b border-clay/40">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-fire text-white rounded-xl flex items-center justify-center text-xl font-bold shadow-sm">
-            🧠
+          <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-sun/30">
+            <img src={brainLogo} alt="SmritiSetu Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-ink">NER-MemoryCare</h1>
+            <h1 className="text-base font-bold text-ink">SmritiSetu</h1>
             <p className="text-xs text-ink/60">Caregiver Portal</p>
           </div>
         </div>

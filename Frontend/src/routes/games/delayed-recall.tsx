@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/delayed-recall")({
   }),
   head: () => ({
     meta: [
-      { title: "Delayed Recall | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Delayed Recall | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: DelayedRecallPage,

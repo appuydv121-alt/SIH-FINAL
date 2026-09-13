@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/word-scramble")({
   }),
   head: () => ({
     meta: [
-      { title: "Word Scramble | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Word Scramble | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: WordScramblePage,

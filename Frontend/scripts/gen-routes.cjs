@@ -50,8 +50,8 @@ export const Route = createFileRoute("/games/${game.id}")({
   }),
   head: () => ({
     meta: [
-      { title: "${title} | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "${title} | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: ${game.component}Page,

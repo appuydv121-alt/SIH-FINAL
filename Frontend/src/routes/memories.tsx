@@ -21,10 +21,10 @@ import defaultMemoryPhoto from "@/assets/memory-triptych.jpg";
 export const Route = createFileRoute("/memories")({
   head: () => ({
     meta: [
-      { title: "My Memories | CuCove" },
+      { title: "My Memories | SmritiSetu" },
       {
         name: "description",
-        content: "Familiar people, places, and personal life stories on CuCove.",
+        content: "Familiar people, places, and personal life stories on SmritiSetu.",
       },
     ],
   }),

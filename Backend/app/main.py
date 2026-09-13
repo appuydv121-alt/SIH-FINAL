@@ -31,9 +31,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="NER-MemoryCare API",
+    title="SmritiSetu API",
     description=(
-        "Backend API for the NER-MemoryCare platform "
+        "Backend API for the SmritiSetu platform "
         "for elderly cognitive assistance, games tracking, "
         "medication schedules, and AI assessment."
     ),
@@ -142,7 +142,7 @@ app.include_router(api_router)
 def root_health():
     return {
         "success": True,
-        "message": "NER-MemoryCare backend is running",
+        "message": "SmritiSetu backend is running",
         "api_v1": "/api/v1",
         "docs": "/docs",
     }

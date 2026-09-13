@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/ball-sort")({
   }),
   head: () => ({
     meta: [
-      { title: "Ball Sort | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Ball Sort | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: BallSortPage,

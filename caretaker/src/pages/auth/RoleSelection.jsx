@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Users, User, ChevronRight } from 'lucide-react'
+import brainLogo from '../../assets/brain-logo.png'
 
 export default function RoleSelection() {
   const navigate = useNavigate()
@@ -8,13 +9,13 @@ export default function RoleSelection() {
     <div className="auth-theme min-h-screen bg-ink flex items-center justify-center p-4">
       <div className="w-full max-w-[480px] flex flex-col items-center">
         {/* Logo Badge */}
-        <div className="w-20 h-20 rounded-full bg-sun text-ink flex items-center justify-center text-4xl shadow-lg mb-4 select-none">
-          🧠
+        <div className="w-20 h-20 rounded-full overflow-hidden shadow-lg mb-4 select-none border-2 border-sun/30">
+          <img src={brainLogo} alt="SmritiSetu Logo" className="w-full h-full object-contain" />
         </div>
 
         {/* Title & Subtitle */}
         <h1 className="text-3xl font-bold text-cream text-center tracking-tight">
-          NER-MemoryCare
+          SmritiSetu
         </h1>
         <p className="text-sm text-cream/60 text-center mt-1">
           Cognitive assistance for elderly care

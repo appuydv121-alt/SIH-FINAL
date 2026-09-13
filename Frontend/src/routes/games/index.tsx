@@ -5,7 +5,7 @@ import { GameDashboard } from "@/features/games/components/GameDashboard";
 export const Route = createFileRoute("/games/")({
   head: () => ({
     meta: [
-      { title: "Cognitive Training Centre | CuCove" },
+      { title: "Cognitive Training Centre | SmritiSetu" },
       {
         name: "description",
         content:

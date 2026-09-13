@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/maze")({
   }),
   head: () => ({
     meta: [
-      { title: "Maze | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "Maze | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: MazePage,

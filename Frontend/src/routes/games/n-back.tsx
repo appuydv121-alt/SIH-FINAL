@@ -9,8 +9,8 @@ export const Route = createFileRoute("/games/n-back")({
   }),
   head: () => ({
     meta: [
-      { title: "N Back | CuCove" },
-      { name: "description", content: "Cognitive training game on CuCove." },
+      { title: "N Back | SmritiSetu" },
+      { name: "description", content: "Cognitive training game on SmritiSetu." },
     ],
   }),
   component: NBackPage,

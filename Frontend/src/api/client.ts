@@ -1,8 +1,8 @@
 import type { User } from "../types/api";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api/v1";
-const TOKEN_KEY = "cucove_auth_token";
-const USER_KEY = "cucove_auth_user";
+const TOKEN_KEY = "smritisetu_auth_token";
+const USER_KEY = "smritisetu_auth_user";
 
 export interface ApiValidationErrorDetail {
   field?: string;
@@ -87,7 +87,7 @@ export function formatApiError(
     }
 
     if (err.status === 0) {
-      return "Unable to connect to CuCove server. Please ensure the backend is running and check your network.";
+      return "Unable to connect to SmritiSetu server. Please ensure the backend is running and check your network.";
     }
     if (err.status === 401) {
       return "Invalid email or password. Please try again.";
@@ -105,7 +105,7 @@ export function formatApiError(
       return "Validation failed. Please review the highlighted fields and try again.";
     }
     if (err.status >= 500) {
-      return "CuCove server encountered an unexpected error. Please try again later.";
+      return "SmritiSetu server encountered an unexpected error. Please try again later.";
     }
   }
 
@@ -118,7 +118,7 @@ export function formatApiError(
       rawMsg.includes("networkerror") ||
       rawMsg.includes("connection refused")
     ) {
-      return "Unable to connect to CuCove server. Please ensure the backend is running at http://127.0.0.1:8000 and check your network.";
+      return "Unable to connect to SmritiSetu server. Please ensure the backend is running at http://127.0.0.1:8000 and check your network.";
     }
     return err.message;
   }
@@ -185,7 +185,7 @@ async function executeFetch(url: string, config: RequestInit): Promise<Response>
     }
 
     throw new ApiRequestError(
-      "Unable to connect to CuCove server. Please verify the backend is running on port 8000.",
+      "Unable to connect to SmritiSetu server. Please verify the backend is running on port 8000.",
       0,
       "NETWORK_ERROR",
     );
@@ -232,7 +232,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     if (response.status === 401) {
       clearStoredAuth();
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("cucove:unauthorized"));
+        window.dispatchEvent(new CustomEvent("smritisetu:unauthorized"));
       }
     }
 

@@ -220,7 +220,7 @@ export function useVoiceAssistant() {
 
     const lang = getLangKey(language);
     const summaryPrefix = {
-      en: `You are on ${h1 || "CuCove"}. Content summary: `,
+      en: `You are on ${h1 || "SmritiSetu"}. Content summary: `,
       hi: `आप ${h1 || "स्मृतिसेतु"} पर हैं। स्क्रीन की जानकारी: `,
       as: `আপুনি ${h1 || "স্মৃতিসেতু"} পৃষ্ঠা চাই আছে। সাৰাংশ: `,
       bn: `আপনি ${h1 || "স্মৃতিসেতু"} পেজে আছেন। সারাংশ: `,

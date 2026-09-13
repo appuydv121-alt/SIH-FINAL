@@ -31,10 +31,10 @@ import type { TaskPriority } from "@/types/api";
 export const Route = createFileRoute("/routine")({
   head: () => ({
     meta: [
-      { title: "Daily Routine | CuCove" },
+      { title: "Daily Routine | SmritiSetu" },
       {
         name: "description",
-        content: "Reassuring, structured daily activities and reminders on CuCove.",
+        content: "Reassuring, structured daily activities and reminders on SmritiSetu.",
       },
     ],
   }),

@@ -40,18 +40,18 @@ def run_tests():
     assert_test("Health Check", status == 200 and data.get("database") == "connected")
 
     # 2. Patient Auth Login
-    status, data = request("POST", "/auth/login", {"email": "lalita@cucove.com", "password": "Password123!"})
+    status, data = request("POST", "/auth/login", {"email": "lalita@smritisetu.com", "password": "Password123!"})
     assert_test("Patient Login (Lalita)", status == 200 and "token" in data)
     patient_token = data.get("token", {}).get("access_token")
     patient_id = data.get("user", {}).get("id")
 
     # 3. Doctor Auth Login
-    status, data = request("POST", "/auth/login", {"email": "doctor@cucove.com", "password": "Password123!"})
+    status, data = request("POST", "/auth/login", {"email": "doctor@smritisetu.com", "password": "Password123!"})
     assert_test("Doctor Login (Dr. Sharma)", status == 200 and data.get("user", {}).get("role") == "doctor")
     doctor_token = data.get("token", {}).get("access_token")
 
     # 4. Caretaker Auth Login
-    status, data = request("POST", "/auth/login", {"email": "caregiver@cucove.com", "password": "Password123!"})
+    status, data = request("POST", "/auth/login", {"email": "caregiver@smritisetu.com", "password": "Password123!"})
     assert_test("Caregiver Login (Rahul)", status == 200 and data.get("user", {}).get("role") == "caretaker")
     caretaker_token = data.get("token", {}).get("access_token")
 

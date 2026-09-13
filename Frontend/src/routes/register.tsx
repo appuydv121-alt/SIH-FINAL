@@ -12,8 +12,8 @@ import type { UserRole } from "../types/api";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Register | CuCove" },
-      { name: "description", content: "Create an account on CuCove." },
+      { title: "Register | SmritiSetu" },
+      { name: "description", content: "Create an account on SmritiSetu." },
     ],
   }),
   component: RegisterPage,
@@ -89,9 +89,9 @@ function RegisterPage() {
           <span className="flex size-14 items-center justify-center rounded-xl bg-sun text-ink shadow-md">
             <House size={32} strokeWidth={2.5} />
           </span>
-          <span className="font-display text-4xl font-bold text-cream">CuCove</span>
+          <span className="font-display text-4xl font-bold text-cream">SmritiSetu</span>
         </Link>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Join CuCove</h1>
+        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Join SmritiSetu</h1>
         <p className="mt-2 text-base text-cream/70">
           Create an account for personalized cognitive care.
         </p>

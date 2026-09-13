@@ -31,7 +31,7 @@ import {
 export const Route = createFileRoute("/doctor")({
   head: () => ({
     meta: [
-      { title: "Doctor Portal | CuCove" },
+      { title: "Doctor Portal | SmritiSetu" },
       {
         name: "description",
         content: "Doctor clinical dashboard for managing prescriptions and cognitive evaluations.",

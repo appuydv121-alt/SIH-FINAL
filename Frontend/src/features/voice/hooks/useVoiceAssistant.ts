@@ -109,7 +109,7 @@ export function useVoiceAssistant(
         // ignore
       }
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("cucove:close-voice"));
+        window.dispatchEvent(new CustomEvent("smritisetu:close-voice"));
       }
     }, delay);
   }, []);

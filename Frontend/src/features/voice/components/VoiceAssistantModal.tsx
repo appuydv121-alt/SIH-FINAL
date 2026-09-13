@@ -104,9 +104,9 @@ export function VoiceAssistantModal({
       onClose();
     };
 
-    window.addEventListener("cucove:close-voice", handleCloseEvent);
+    window.addEventListener("smritisetu:close-voice", handleCloseEvent);
     return () => {
-      window.removeEventListener("cucove:close-voice", handleCloseEvent);
+      window.removeEventListener("smritisetu:close-voice", handleCloseEvent);
     };
   }, [onClose]);
 

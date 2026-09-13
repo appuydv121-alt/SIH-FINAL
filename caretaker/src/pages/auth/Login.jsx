@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
+import brainLogo from '../../assets/brain-logo.png'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -30,8 +31,8 @@ export default function Login() {
     <div className="min-h-screen bg-ink flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-sun rounded-2xl flex items-center justify-center text-ink text-3xl mx-auto mb-4">🧠</div>
-          <h1 className="text-3xl font-bold text-cream">NER-MemoryCare</h1>
+          <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-4 border-2 border-sun/30 shadow-md"><img src={brainLogo} alt="SmritiSetu Logo" className="w-full h-full object-contain" /></div>
+          <h1 className="text-3xl font-bold text-cream">SmritiSetu</h1>
           <p className="text-sm text-cream/60 mt-2">Caregiver Dashboard</p>
         </div>
 

@@ -34,7 +34,7 @@ export const SUPPORTED_LANGUAGES_LIST: Array<{
   { code: "brx-IN", name: "Bodo", nativeName: "बड़ो" },
 ];
 
-const STORAGE_KEY = "cucove_preferred_language";
+const STORAGE_KEY = "smritisetu_preferred_language";
 
 function normalizeLanguageCode(raw: string | undefined | null): VoiceLanguageCode {
   if (!raw) return "en-IN";
@@ -92,7 +92,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         try {
           localStorage.setItem(STORAGE_KEY, normalized);
           window.dispatchEvent(
-            new CustomEvent("cucove:language-change", { detail: { language: normalized } }),
+            new CustomEvent("smritisetu:language-change", { detail: { language: normalized } }),
           );
         } catch {
           // ignore

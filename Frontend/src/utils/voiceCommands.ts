@@ -1,6 +1,6 @@
 import type { NlpInterpretation, VoiceCommandExecutionResult, VoiceEntity } from "../types/voice";
 
-// Entity to actual CuCove game route mapping
+// Entity to actual SmritiSetu game route mapping
 export const GAME_ENTITY_ROUTE_MAP: Record<
   string,
   { route: string; name: Record<string, string> }
@@ -527,7 +527,7 @@ export function executeVoiceCommand(
       const h1Text = document.querySelector("h1")?.textContent?.trim();
       const summary = h1Text
         ? `You are currently viewing ${h1Text}.`
-        : "You are currently viewing CuCove.";
+        : "You are currently viewing SmritiSetu.";
       return {
         success: true,
         intent,
