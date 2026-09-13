@@ -5,10 +5,8 @@ import {
   ArrowLeft,
   Sparkles,
   ShieldCheck,
-  AlertTriangle,
   RotateCw,
   Activity,
-  CheckCircle2,
   TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +16,7 @@ import { NavigationHeader } from "@/components/navigation-header";
 import { Button } from "@/components/ui/button";
 import { useAnalytics } from "@/hooks/use-analytics";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -36,7 +35,8 @@ export const Route = createFileRoute("/analytics")({
 function AnalyticsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { latestAssessment, trends, isLoading, isAssessing, triggerAssessment } = useAnalytics();
+  const { t } = useLanguage();
+  const { latestAssessment, isLoading, isAssessing, triggerAssessment } = useAnalytics();
 
   useEffect(() => {
     if (user && user.role === "patient") {
@@ -56,13 +56,19 @@ function AnalyticsPage() {
   };
 
   const domainData = [
-    { domain: "Memory", score: latestAssessment?.memory_score ?? 84 },
-    { domain: "Attention", score: latestAssessment?.attention_score ?? 81 },
-    { domain: "Executive", score: latestAssessment?.executive_function_score ?? 80 },
-    { domain: "Language", score: latestAssessment?.language_score ?? 85 },
+    { domain: t("analytics:memory"), score: latestAssessment?.memory_score ?? 84 },
+    { domain: t("analytics:attention"), score: latestAssessment?.attention_score ?? 81 },
+    { domain: t("analytics:executiveFunction"), score: latestAssessment?.executive_function_score ?? 80 },
+    { domain: t("analytics:language"), score: latestAssessment?.language_score ?? 85 },
   ];
 
   const riskLevel = latestAssessment?.risk_level ?? "low";
+  const riskLabel =
+    riskLevel === "low"
+      ? t("analytics:lowRisk")
+      : riskLevel === "moderate"
+        ? t("analytics:moderateRisk")
+        : t("analytics:highRisk");
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -73,7 +79,7 @@ function AnalyticsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <Button asChild variant="cream" size="touch">
             <Link to="/">
-              <ArrowLeft size={20} className="mr-2" /> Back Home
+              <ArrowLeft size={20} className="mr-2" /> {t("common:backHome")}
             </Link>
           </Button>
 
@@ -86,7 +92,7 @@ function AnalyticsPage() {
             className="text-base font-extrabold gap-2"
           >
             <RotateCw size={18} className={isAssessing ? "animate-spin" : ""} />
-            {isAssessing ? "EVALUATING AI MODEL…" : "RUN AI ASSESSMENT NOW"}
+            {isAssessing ? t("analytics:assessing") : t("analytics:runAssessmentNow")}
           </Button>
         </div>
 
@@ -98,10 +104,10 @@ function AnalyticsPage() {
             </span>
             <div>
               <h1 className="font-display text-3xl sm:text-4xl font-bold text-cream">
-                Cognitive Performance & AI Analytics
+                {t("analytics:pageTitle")}
               </h1>
               <p className="text-cream/80 mt-1">
-                Real-time tracking of memory retention, attention span, and routine stability.
+                {t("analytics:pageSubtitle")}
               </p>
             </div>
           </div>
@@ -112,13 +118,13 @@ function AnalyticsPage() {
           {/* Overall Composite Score */}
           <div className="rounded-2xl border border-clay bg-surface p-6 shadow-card flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-cream/70">Composite Cognitive Index</p>
+              <p className="text-xs font-bold uppercase text-cream/70">{t("analytics:cognitiveIndex")}</p>
               <p className="font-display text-4xl sm:text-5xl font-bold text-sun mt-1">
                 {latestAssessment?.overall_score ? `${latestAssessment.overall_score}` : "83.5"}
                 <span className="text-xl text-cream/60 font-sans"> / 100</span>
               </p>
               <p className="text-xs text-tea-confirm font-bold mt-2 flex items-center gap-1">
-                <TrendingUp size={14} /> Stable & active recall
+                <TrendingUp size={14} /> {t("analytics:stableTrend")}
               </p>
             </div>
             <div className="size-16 rounded-2xl bg-sun/15 flex items-center justify-center text-sun">
@@ -130,7 +136,7 @@ function AnalyticsPage() {
           <div className="rounded-2xl border border-clay bg-surface p-6 shadow-card flex items-center justify-between">
             <div>
               <p className="text-xs font-bold uppercase text-cream/70">
-                Clinical Assessment Status
+                {t("analytics:riskLevel")}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 <span
@@ -142,7 +148,7 @@ function AnalyticsPage() {
                         : "bg-fire/30 text-fire border border-fire"
                   }`}
                 >
-                  {riskLevel} Risk
+                  {riskLabel}
                 </span>
               </div>
               <p className="text-xs text-cream/70 mt-2">
@@ -179,7 +185,7 @@ function AnalyticsPage() {
           {/* Domain Breakdown Chart */}
           <div className="rounded-2xl border border-clay bg-surface p-6 sm:p-8 shadow-card">
             <h2 className="font-display text-2xl font-bold text-cream mb-2">
-              Domain Performance Scores
+              {t("analytics:domainBreakdown")}
             </h2>
             <p className="text-cream/70 text-sm mb-6">
               Assessed across game accuracy, speed, and medication consistency.
@@ -212,7 +218,7 @@ function AnalyticsPage() {
                 <Sparkles size={16} /> Clinical AI Analysis
               </div>
               <h2 className="font-display text-2xl font-bold text-cream mb-4">
-                Observations & Insights
+                {t("analytics:clinicalInsights")}
               </h2>
 
               <div className="space-y-4">

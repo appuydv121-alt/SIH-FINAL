@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { House, ArrowRight, User, Stethoscope, Users, LogIn, AlertCircle } from "lucide-react";
+import { House, LogIn, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import { formatApiError } from "../api/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -67,9 +69,9 @@ function LoginPage() {
           </span>
           <span className="font-display text-4xl font-bold text-cream">SmritiSetu</span>
         </Link>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Welcome Back</h1>
+        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">{t("auth:signInTitle")}</h1>
         <p className="mt-2 text-base text-cream/70">
-          Sign in with your registered account credentials.
+          {t("auth:signInSubtitle")}
         </p>
       </div>
 
@@ -86,7 +88,7 @@ function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <Label htmlFor="email" className="block text-base font-bold text-cream mb-2">
-                Email Address
+                {t("auth:email")}
               </Label>
               <Input
                 id="email"
@@ -101,7 +103,7 @@ function LoginPage() {
 
             <div>
               <Label htmlFor="password" className="block text-base font-bold text-cream mb-2">
-                Password
+                {t("auth:password")}
               </Label>
               <Input
                 id="password"
@@ -122,19 +124,19 @@ function LoginPage() {
               className="w-full text-lg mt-2 font-bold"
             >
               {isLoading ? (
-                "Signing In…"
+                t("common:loading")
               ) : (
                 <>
-                  <LogIn size={20} /> SIGN IN
+                  <LogIn size={20} className="mr-2" /> {t("auth:signInButton")}
                 </>
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-cream/70">
-            Don't have an account yet?{" "}
+            {t("auth:dontHaveAccount")}{" "}
             <Link to="/register" className="font-bold text-sun hover:underline">
-              Create an account
+              {t("common:register")}
             </Link>
           </div>
         </div>

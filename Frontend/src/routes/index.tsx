@@ -16,13 +16,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { NavigationHeader } from "@/components/navigation-header";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import { useTasks } from "@/hooks/use-tasks";
 import { useMedications } from "@/hooks/use-medications";
 import { useMemories } from "@/hooks/use-memories";
 import { useGames } from "@/hooks/use-games";
 import { formatApiError } from "@/api/client";
-import { voiceApi } from "@/api/voice.api";
-import { translationApi } from "@/api/translation.api";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,7 +30,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Lalita's accessible daily home for memory games, medicine, personal memories, and routines.",
+          "Accessible daily home for memory games, medicine, personal memories, and routines.",
       },
       { property: "og:title", content: "Home | SmritiSetu" },
       {
@@ -46,10 +45,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
+  const { t, language } = useLanguage();
   const { todayTasks, completeTask, isLoading: tasksLoading } = useTasks();
   const { todayLogs, todaySchedules, updateLogStatus, isLoading: medsLoading } = useMedications();
-  const { memories, isLoading: memoriesLoading } = useMemories();
+  const { memories } = useMemories();
   const { summary: gameSummary } = useGames();
 
   // Dynamic Memories Cover & Content
@@ -77,16 +77,36 @@ function Index() {
   const completedItems = completedTasksCount + completedMedsCount;
   const progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
-  // Today's formatted date string
-  const todayFormatted = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(new Date());
+  // Localized date string using active language code
+  const todayFormatted = (() => {
+    try {
+      return new Intl.DateTimeFormat(language || "en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      }).format(new Date());
+    } catch {
+      return new Intl.DateTimeFormat("en-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      }).format(new Date());
+    }
+  })();
+
+  const currentHour = new Date().getHours();
+  const greetingKey =
+    currentHour < 12
+      ? "dashboard:greetingMorning"
+      : currentHour < 17
+      ? "dashboard:greetingAfternoon"
+      : "dashboard:greetingEvening";
+
+  const patientName = user?.name?.split(" ")[0] || "Friend";
 
   const handleToggleMedicine = async () => {
     if (!nextScheduledLog) {
-      toast.info("No active medication log found for today.");
+      toast.info(t("dashboard:noMedsAssigned"));
       return;
     }
     const newStatus = isMedicineTaken ? "scheduled" : "taken";
@@ -98,8 +118,8 @@ function Index() {
       });
       toast.success(
         newStatus === "taken"
-          ? "Great job! Medicine marked as taken."
-          : "Medicine marked as scheduled.",
+          ? t("dashboard:medTakenSubtext")
+          : t("dashboard:dueToday"),
       );
     } catch (err: unknown) {
       toast.error(formatApiError(err, "Failed to update medication status"));
@@ -123,10 +143,10 @@ function Index() {
         {/* Reassuring Greeting */}
         <p className="text-xl font-extrabold uppercase tracking-wider text-sun">{todayFormatted}</p>
         <h1 className="mt-3 font-display text-5xl font-bold leading-tight text-cream sm:text-7xl">
-          Good morning, {user?.name?.split(" ")[0] || "Friend"} <span aria-hidden="true">👋</span>
+          {t(greetingKey, { name: patientName })} <span aria-hidden="true">👋</span>
         </h1>
         <p className="mt-3 text-2xl text-cream/80 max-w-2xl">
-          Here is your day. Take it one gentle step at a time.
+          {t("dashboard:subGreetingGentle")}
         </p>
 
         {/* Cognitive Games Highlight Card */}
@@ -137,21 +157,24 @@ function Index() {
           >
             <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-14">
               <div className="flex items-center gap-3 text-xl font-extrabold uppercase">
-                <Brain size={32} aria-hidden="true" /> Cognitive Games
+                <Brain size={32} aria-hidden="true" /> {t("dashboard:cognitiveCenter")}
               </div>
               <p className="mt-6 text-xl font-bold uppercase tracking-wider">
-                TODAY’S BRAIN CHALLENGE
+                {t("dashboard:brainChallenge")}
               </p>
               <h2 id="games-title" className="mt-2 font-display text-5xl font-bold sm:text-6xl">
-                Memory Match
+                {t("dashboard:memoryMatch")}
               </h2>
               <p className="mt-4 max-w-xl text-xl leading-relaxed opacity-90">
                 {gameSummary && gameSummary.total_sessions > 0
-                  ? `You've completed ${gameSummary.total_sessions} game sessions with an average accuracy of ${Math.round(gameSummary.average_accuracy)}%. Find matching pairs today!`
-                  : "Find the matching card pairs. A calming activity to stimulate recall and keep your memory sharp."}
+                  ? t("dashboard:memoryMatchStats", {
+                      sessions: gameSummary.total_sessions,
+                      accuracy: Math.round(gameSummary.average_accuracy),
+                    })
+                  : t("dashboard:memoryMatchDesc")}
               </p>
               <span className="mt-8 inline-flex min-h-16 w-fit items-center gap-3 rounded-xl bg-ink px-8 text-xl font-extrabold text-cream shadow-md transition group-hover:bg-surface">
-                PLAY NOW <ArrowRight size={24} aria-hidden="true" />
+                {t("common:playNow")} <ArrowRight size={24} aria-hidden="true" />
               </span>
             </div>
             <div className="grid grid-cols-2 gap-4 bg-ink/10 p-7 sm:p-10 items-center">
@@ -188,10 +211,14 @@ function Index() {
 
             <div className="relative z-10 pointer-events-none flex items-center justify-between">
               <div className="flex items-center gap-3 text-xl font-extrabold uppercase">
-                <Pill size={32} aria-hidden="true" /> Medication
+                <Pill size={32} aria-hidden="true" /> {t("dashboard:medication")}
               </div>
               <span className="text-sm font-bold opacity-80 uppercase tracking-wider">
-                {!hasMedication ? "No Prescriptions" : isMedicineTaken ? "Completed" : "Due Today"}
+                {!hasMedication
+                  ? t("dashboard:noPrescriptions")
+                  : isMedicineTaken
+                  ? t("dashboard:completed")
+                  : t("dashboard:dueToday")}
               </span>
             </div>
 
@@ -200,9 +227,9 @@ function Index() {
                 <span className="flex size-20 items-center justify-center rounded-full bg-clay/50 text-cream/70 mb-4">
                   <Pill size={40} />
                 </span>
-                <h2 className="text-2xl font-bold">No medicines assigned yet</h2>
+                <h2 className="text-2xl font-bold">{t("dashboard:noMedsAssigned")}</h2>
                 <p className="mt-2 text-lg text-cream/70 max-w-sm">
-                  Your caretaker or doctor will add your daily medications here.
+                  {t("dashboard:noMedsSubtext")}
                 </p>
               </div>
             ) : isMedicineTaken ? (
@@ -210,9 +237,9 @@ function Index() {
                 <span className="flex size-24 items-center justify-center rounded-full bg-cream text-tea-confirm shadow-inner">
                   <Check size={58} strokeWidth={3} aria-hidden="true" />
                 </span>
-                <h2 className="mt-5 font-display text-5xl font-bold">Taken</h2>
+                <h2 className="mt-5 font-display text-5xl font-bold">{t("dashboard:medTaken")}</h2>
                 <p className="mt-2 text-xl max-w-sm">
-                  {matchingSchedule?.medicine_name || "Medicine"} is taken. You are right on track!
+                  {t("dashboard:medTakenSubtext")}
                 </p>
               </div>
             ) : (
@@ -223,7 +250,7 @@ function Index() {
                     : "10:00 AM"}
                 </p>
                 <h2 className="mt-2 text-3xl font-bold">
-                  {matchingSchedule?.medicine_name} Due
+                  {matchingSchedule?.medicine_name} {t("dashboard:dueToday")}
                 </h2>
                 <p className="mt-2 text-xl opacity-90">
                   {matchingSchedule?.dosage} · {matchingSchedule?.instructions || "Take as prescribed"}
@@ -241,11 +268,11 @@ function Index() {
               >
                 {isMedicineTaken ? (
                   <>
-                    <RefreshCw size={20} className="mr-2" /> MARK AS NOT TAKEN
+                    <RefreshCw size={20} className="mr-2" /> {t("dashboard:markNotTaken")}
                   </>
                 ) : (
                   <>
-                    TAKE MEDICINE <ArrowRight size={24} aria-hidden="true" />
+                    {t("dashboard:takeMedicine")} <ArrowRight size={24} aria-hidden="true" />
                   </>
                 )}
               </Button>
@@ -254,7 +281,7 @@ function Index() {
                 to="/medication"
                 className="relative z-20 mt-4 inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-cream text-ink text-lg font-bold hover:bg-cream/90 transition text-center"
               >
-                VIEW MEDICATION SCHEDULE <ArrowRight size={20} />
+                {t("dashboard:viewMedSchedule")} <ArrowRight size={20} />
               </Link>
             )}
           </article>
@@ -266,12 +293,12 @@ function Index() {
           >
             <div className="p-7 pb-4 sm:p-10 sm:pb-5">
               <div className="flex items-center gap-3 text-xl font-extrabold uppercase text-sun">
-                <Heart size={32} aria-hidden="true" /> My Memories
+                <Heart size={32} aria-hidden="true" /> {t("dashboard:myMemories")}
               </div>
               <h2 className="mt-4 font-display text-4xl font-bold">
                 {hasMemories && latestMemory
                   ? latestMemory.title
-                  : "The people and places you love"}
+                  : t("dashboard:memoriesSubtext")}
               </h2>
               {hasMemories && latestMemory && (
                 <p className="mt-2 text-cream/70 text-base line-clamp-1">
@@ -290,7 +317,7 @@ function Index() {
             ) : hasMemories ? (
               <div className="h-44 w-full bg-ink/60 border-y border-clay/60 flex items-center justify-center text-center p-4">
                 <p className="text-cream/70 text-sm max-w-xs">
-                  {latestMemory?.description || "Cherished family recollections"}
+                  {latestMemory?.description || t("dashboard:memoriesSubtext")}
                 </p>
               </div>
             ) : (
@@ -298,13 +325,13 @@ function Index() {
                 <span className="flex size-12 items-center justify-center rounded-full bg-clay/50 text-cream/60 mb-2">
                   <Heart size={24} />
                 </span>
-                <p className="text-cream/80 font-bold text-base">Your memories will appear here</p>
-                <p className="text-cream/60 text-xs mt-0.5">No memories added yet. Click to view or create your first memory.</p>
+                <p className="text-cream/80 font-bold text-base">{t("dashboard:memoriesEmptyTitle")}</p>
+                <p className="text-cream/60 text-xs mt-0.5">{t("dashboard:memoriesEmptyDesc")}</p>
               </div>
             )}
 
             <div className="flex min-h-20 items-center justify-between px-7 text-xl font-extrabold text-sun sm:px-10 border-t border-clay/50">
-              <span>{hasMemories ? "EXPLORE MEMORIES" : "CREATE FIRST MEMORY"}</span>
+              <span>{hasMemories ? t("dashboard:exploreMemories") : t("dashboard:createFirstMemory")}</span>
               <ArrowRight
                 className="transition-transform group-hover:translate-x-2"
                 aria-hidden="true"
@@ -321,28 +348,28 @@ function Index() {
           <div className="flex flex-wrap items-end justify-between gap-5 pb-4 border-b border-clay/60">
             <div>
               <div className="flex items-center gap-3 text-xl font-extrabold uppercase text-sun">
-                <CalendarDays size={32} aria-hidden="true" /> Your day
+                <CalendarDays size={32} aria-hidden="true" /> {t("dashboard:yourDay")}
               </div>
               <h2 id="routine-title" className="mt-2 font-display text-4xl font-bold sm:text-5xl">
-                Today’s Routine
+                {t("dashboard:todaysRoutine")}
               </h2>
             </div>
             <Link
               to="/routine"
               className="flex min-h-14 items-center gap-2 rounded-xl px-4 text-lg font-extrabold text-sun hover:bg-clay transition"
             >
-              VIEW FULL SCHEDULE <ArrowRight aria-hidden="true" />
+              {t("dashboard:viewFullSchedule")} <ArrowRight aria-hidden="true" />
             </Link>
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {tasksLoading ? (
               <p className="col-span-full py-8 text-center text-cream/70 text-lg">
-                Loading today’s schedule…
+                {t("dashboard:loadingSchedule")}
               </p>
             ) : todayTasks.length === 0 ? (
               <p className="col-span-full py-8 text-center text-cream/70 text-lg">
-                No routine activities scheduled yet for today.
+                {t("dashboard:noRoutineScheduled")}
               </p>
             ) : (
               todayTasks.map((task) => {

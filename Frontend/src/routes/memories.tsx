@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useMemories } from "@/hooks/use-memories";
+import { useLanguage } from "@/context/LanguageContext";
 import { formatApiError } from "@/api/client";
 import defaultMemoryPhoto from "@/assets/memory-triptych.jpg";
 
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/memories")({
 
 function MemoriesPage() {
   const { memories, isLoading, createMemory, deleteMemory, isCreating } = useMemories();
+  const { t } = useLanguage();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<"Family" | "Places" | "Celebrations">("Family");
@@ -41,6 +43,12 @@ function MemoriesPage() {
   const [imageBase64, setImageBase64] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const categoryLabels: Record<string, string> = {
+    Family: t("memories:family"),
+    Places: t("memories:places"),
+    Celebrations: t("memories:celebrations"),
+  };
+
   const handleSpeak = (promptText: string) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -48,7 +56,7 @@ function MemoriesPage() {
       utterance.rate = 0.88;
       utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
-      toast.info("Playing comforting memory story…");
+      toast.info(t("memories:playingRecollection"));
     } else {
       toast.info(promptText);
     }
@@ -58,7 +66,6 @@ function MemoriesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Compress image using canvas before storing/uploading
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -106,7 +113,7 @@ function MemoriesPage() {
         image_url: imageBase64 || undefined,
       });
 
-      toast.success("Memory saved to your family album!");
+      toast.success(t("memories:savedSuccess"));
       setIsAddOpen(false);
       setTitle("");
       setDescription("");
@@ -120,7 +127,7 @@ function MemoriesPage() {
   const handleDeleteMemory = async (id: string) => {
     try {
       await deleteMemory(id);
-      toast.success("Memory removed.");
+      toast.success(t("common:done"));
     } catch (err: unknown) {
       toast.error(formatApiError(err, "Failed to delete memory"));
     }
@@ -135,7 +142,7 @@ function MemoriesPage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <Button asChild variant="cream" size="touch">
             <Link to="/">
-              <ArrowLeft size={20} className="mr-2" /> Back Home
+              <ArrowLeft size={20} className="mr-2" /> {t("common:backHome")}
             </Link>
           </Button>
 
@@ -143,20 +150,20 @@ function MemoriesPage() {
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
               <Button variant="cream" size="touch" className="text-base font-extrabold">
-                <Plus size={20} className="mr-2" /> ADD MEMORY
+                <Plus size={20} className="mr-2" /> {t("memories:addMemory")}
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-surface border-clay text-cream max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="font-display text-2xl font-bold text-cream">
-                  Add a Family Memory
+                  {t("memories:addMemoryDialogTitle")}
                 </DialogTitle>
               </DialogHeader>
 
               <form onSubmit={handleAddMemory} className="space-y-4 mt-4">
                 <div>
                   <Label htmlFor="mem-title" className="text-sm font-bold text-cream">
-                    Memory Title
+                    {t("memories:memoryTitle")}
                   </Label>
                   <Input
                     id="mem-title"
@@ -169,7 +176,9 @@ function MemoriesPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-bold text-cream mb-1 block">Category</Label>
+                  <Label className="text-sm font-bold text-cream mb-1 block">
+                    {t("memories:category")}
+                  </Label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["Family", "Places", "Celebrations"] as const).map((cat) => (
                       <button
@@ -182,7 +191,7 @@ function MemoriesPage() {
                             : "bg-ink border border-clay text-cream hover:bg-clay"
                         }`}
                       >
-                        {cat}
+                        {categoryLabels[cat] || cat}
                       </button>
                     ))}
                   </div>
@@ -190,7 +199,7 @@ function MemoriesPage() {
 
                 <div>
                   <Label htmlFor="mem-loc" className="text-sm font-bold text-cream">
-                    Location (Optional)
+                    {t("memories:location")}
                   </Label>
                   <Input
                     id="mem-loc"
@@ -203,7 +212,7 @@ function MemoriesPage() {
 
                 <div>
                   <Label htmlFor="mem-desc" className="text-sm font-bold text-cream">
-                    Description & Heartwarming Details
+                    {t("memories:description")}
                   </Label>
                   <Textarea
                     id="mem-desc"
@@ -217,7 +226,9 @@ function MemoriesPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-bold text-cream mb-1 block">Memory Photo</Label>
+                  <Label className="text-sm font-bold text-cream mb-1 block">
+                    {t("memories:uploadPhoto")}
+                  </Label>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -233,7 +244,7 @@ function MemoriesPage() {
                       onClick={() => fileInputRef.current?.click()}
                       className="border-clay text-cream hover:bg-clay"
                     >
-                      <ImageIcon size={18} className="mr-2" /> Select Photo
+                      <ImageIcon size={18} className="mr-2" /> {t("memories:uploadPhoto")}
                     </Button>
                     {imageBase64 && (
                       <span className="text-xs text-tea-confirm font-bold">Photo attached</span>
@@ -257,10 +268,10 @@ function MemoriesPage() {
                     onClick={() => setIsAddOpen(false)}
                     className="border border-clay text-cream"
                   >
-                    Cancel
+                    {t("common:cancel")}
                   </Button>
                   <Button type="submit" variant="cream" disabled={isCreating}>
-                    {isCreating ? "Saving…" : "Save to Album"}
+                    {isCreating ? t("common:loading") : t("memories:saveMemory")}
                   </Button>
                 </div>
               </form>
@@ -276,10 +287,10 @@ function MemoriesPage() {
             </span>
             <div>
               <h1 className="font-display text-3xl sm:text-4xl font-bold text-cream">
-                My Memories & Familiar Faces
+                {t("memories:pageTitle")}
               </h1>
               <p className="text-cream/80 mt-1">
-                Reminiscence strengthens emotional stability and grounds memory in affection.
+                {t("memories:pageSubtitle")}
               </p>
             </div>
           </div>
@@ -288,16 +299,16 @@ function MemoriesPage() {
         {/* Memory Grid / Empty State */}
         {isLoading ? (
           <div className="py-20 text-center text-cream/70 text-xl font-medium">
-            Loading your album…
+            {t("common:loading")}
           </div>
         ) : memories.length === 0 ? (
           <div className="rounded-2xl border border-clay bg-surface/50 p-12 text-center">
             <span className="flex size-20 items-center justify-center rounded-full bg-clay/50 text-cream/70 mx-auto mb-4">
               <Heart size={40} />
             </span>
-            <h2 className="text-2xl font-bold text-cream">No memories yet</h2>
+            <h2 className="text-2xl font-bold text-cream">{t("memories:emptyMemories")}</h2>
             <p className="mt-2 text-lg text-cream/70 max-w-md mx-auto">
-              Add your first memory with family photos and comforting stories to look back on anytime.
+              {t("dashboard:memoriesEmptyDesc")}
             </p>
             <Button
               variant="cream"
@@ -305,14 +316,15 @@ function MemoriesPage() {
               onClick={() => setIsAddOpen(true)}
               className="mt-6 text-base font-extrabold"
             >
-              <Plus size={20} className="mr-2" /> ADD YOUR FIRST MEMORY
+              <Plus size={20} className="mr-2" /> {t("dashboard:createFirstMemory")}
             </Button>
           </div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {memories.map((m) => {
               const tag = m.tags && m.tags.length > 0 ? m.tags[0] : "Memory";
-              const voiceText = `Remember this memory: ${m.title}. ${m.description}`;
+              const localizedTag = categoryLabels[tag] || tag;
+              const voiceText = `${m.title}. ${m.description}`;
               return (
                 <article
                   key={m.id}
@@ -326,7 +338,7 @@ function MemoriesPage() {
                     />
                     <div className="p-6">
                       <div className="flex items-center justify-between text-xs font-bold text-sun mb-2">
-                        <span className="uppercase tracking-wider">{tag}</span>
+                        <span className="uppercase tracking-wider">{localizedTag}</span>
                         {m.location && <span className="text-cream/60">{m.location}</span>}
                       </div>
                       <h2 className="font-display text-2xl font-bold text-cream mb-2 leading-tight">
@@ -344,13 +356,13 @@ function MemoriesPage() {
                       onClick={() => handleSpeak(voiceText)}
                       className="flex-1 text-base font-extrabold gap-2 mt-4"
                     >
-                      <Volume2 size={20} /> LISTEN TO STORY
+                      <Volume2 size={20} /> {t("memories:listenRecollection")}
                     </Button>
                     <button
                       type="button"
                       onClick={() => handleDeleteMemory(m.id)}
                       className="mt-4 p-3 rounded-xl border border-clay text-cream/60 hover:text-fire hover:border-fire transition"
-                      title="Delete memory"
+                      title={t("common:delete")}
                     >
                       <Trash2 size={20} />
                     </button>

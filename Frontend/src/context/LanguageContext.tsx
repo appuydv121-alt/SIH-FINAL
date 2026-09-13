@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "@/i18n/config";
 import { useAuth } from "@/hooks/use-auth";
 import { authApi } from "@/api/auth.api";
 import type { VoiceLanguageCode } from "@/features/voice/types/voice.types";
 import { getTranslation } from "@/locales/translations";
 
-interface LanguageContextValue {
+export interface LanguageContextValue {
   language: VoiceLanguageCode;
   shortLang: string;
   setLanguage: (code: VoiceLanguageCode) => Promise<void>;
   t: (key: string, params?: Record<string, string | number>) => string;
+  i18n: typeof i18n;
   supportedLanguages: Array<{
     code: VoiceLanguageCode;
     name: string;
@@ -36,7 +39,7 @@ export const SUPPORTED_LANGUAGES_LIST: Array<{
 
 const STORAGE_KEY = "smritisetu_preferred_language";
 
-function normalizeLanguageCode(raw: string | undefined | null): VoiceLanguageCode {
+export function normalizeLanguageCode(raw: string | undefined | null): VoiceLanguageCode {
   if (!raw) return "en-IN";
   const lower = raw.trim().toLowerCase();
   if (lower.startsWith("hi")) return "hi-IN";
@@ -57,20 +60,29 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, refetchMe } = useAuth();
+  const { t: i18nTranslate } = useTranslation();
 
   const [language, setLanguageState] = useState<VoiceLanguageCode>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) return normalizeLanguageCode(stored);
     }
-    return "en-IN";
+    return normalizeLanguageCode(i18n.language) || "en-IN";
   });
+
+  // Keep i18n synchronized with current language state
+  useEffect(() => {
+    if (i18n.language !== language) {
+      void i18n.changeLanguage(language);
+    }
+  }, [language]);
 
   // Sync from user profile when user logs in or profile changes
   useEffect(() => {
     if (user?.preferred_language) {
       const normalized = normalizeLanguageCode(user.preferred_language);
       setLanguageState(normalized);
+      void i18n.changeLanguage(normalized);
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(STORAGE_KEY, normalized);
@@ -87,6 +99,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     async (code: VoiceLanguageCode) => {
       const normalized = normalizeLanguageCode(code);
       setLanguageState(normalized);
+      await i18n.changeLanguage(normalized);
 
       if (typeof window !== "undefined") {
         try {
@@ -113,8 +126,39 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   const t = useCallback(
-    (key: string, params?: Record<string, string | number>) => getTranslation(language, key, params),
-    [language],
+    (key: string, params?: Record<string, string | number>): string => {
+      // 1. Direct key match in i18next
+      if (i18n.exists(key)) {
+        return i18nTranslate(key, params as Record<string, unknown>);
+      }
+
+      // 2. Handle dot-separated namespace keys (e.g., "dashboard.greeting" -> "dashboard:greeting")
+      if (key.includes(".") && !key.includes(":")) {
+        const colonKey = key.replace(".", ":");
+        if (i18n.exists(colonKey)) {
+          return i18nTranslate(colonKey, params as Record<string, unknown>);
+        }
+      }
+
+      // 3. Fallback to common namespace if key is unqualified
+      if (!key.includes(":") && !key.includes(".")) {
+        const commonKey = `common:${key}`;
+        if (i18n.exists(commonKey)) {
+          return i18nTranslate(commonKey, params as Record<string, unknown>);
+        }
+      }
+
+      // 4. Legacy getTranslation dictionary fallback (nav.* and existing phrases)
+      const legacy = getTranslation(language, key, params);
+      if (legacy && legacy !== key) {
+        return legacy;
+      }
+
+      // 5. Fallback return from i18nTranslate or raw key
+      const res = i18nTranslate(key, params as Record<string, unknown>);
+      return res || key;
+    },
+    [i18nTranslate, language],
   );
 
   return (
@@ -124,6 +168,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         shortLang,
         setLanguage,
         t,
+        i18n,
         supportedLanguages: SUPPORTED_LANGUAGES_LIST,
       }}
     >
@@ -141,6 +186,7 @@ export function useLanguage() {
       shortLang: "en",
       setLanguage: async () => {},
       t: (key: string, params?: Record<string, string | number>) => getTranslation("en-IN", key, params),
+      i18n,
       supportedLanguages: SUPPORTED_LANGUAGES_LIST,
     };
   }

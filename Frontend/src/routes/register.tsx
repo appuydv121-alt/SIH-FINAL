@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { House, ArrowRight, UserPlus, AlertCircle } from "lucide-react";
+import { House, UserPlus, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import { formatApiError } from "../api/client";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const { register } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -80,6 +82,12 @@ function RegisterPage() {
     }
   };
 
+  const roleLabels: Record<UserRole, string> = {
+    patient: t("auth:patient"),
+    caretaker: t("auth:caretaker"),
+    doctor: t("auth:doctor"),
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
@@ -89,9 +97,11 @@ function RegisterPage() {
           </span>
           <span className="font-display text-4xl font-bold text-cream">SmritiSetu</span>
         </Link>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">Join SmritiSetu</h1>
+        <h1 className="mt-6 text-3xl font-bold tracking-tight text-cream">
+          {t("auth:registerTitle")}
+        </h1>
         <p className="mt-2 text-base text-cream/70">
-          Create an account for personalized cognitive care.
+          {t("auth:registerSubtitle")}
         </p>
       </div>
 
@@ -107,7 +117,7 @@ function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <Label htmlFor="name" className="block text-base font-bold text-cream mb-2">
-                Full Name
+                {t("auth:fullName")}
               </Label>
               <Input
                 id="name"
@@ -122,7 +132,7 @@ function RegisterPage() {
 
             <div>
               <Label htmlFor="email" className="block text-base font-bold text-cream mb-2">
-                Email Address
+                {t("auth:email")}
               </Label>
               <Input
                 id="email"
@@ -137,7 +147,7 @@ function RegisterPage() {
 
             <div>
               <Label htmlFor="phone" className="block text-base font-bold text-cream mb-2">
-                Phone Number (Optional)
+                {t("auth:phone")}
               </Label>
               <Input
                 id="phone"
@@ -151,7 +161,7 @@ function RegisterPage() {
 
             <div>
               <Label htmlFor="password" className="block text-base font-bold text-cream mb-2">
-                Password (min. 8 characters)
+                {t("auth:password")}
               </Label>
               <Input
                 id="password"
@@ -166,20 +176,22 @@ function RegisterPage() {
             </div>
 
             <div>
-              <Label className="block text-base font-bold text-cream mb-2">Select Your Role</Label>
+              <Label className="block text-base font-bold text-cream mb-2">
+                {t("auth:role")}
+              </Label>
               <div className="grid grid-cols-3 gap-2">
                 {(["patient", "caretaker", "doctor"] as const).map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setRole(r)}
-                    className={`py-3 px-2 rounded-xl border text-sm font-bold capitalize transition ${
+                    className={`py-3 px-2 rounded-xl border text-xs sm:text-sm font-bold capitalize transition ${
                       role === r
                         ? "border-sun bg-sun text-ink shadow-sm"
                         : "border-clay bg-ink text-cream hover:bg-clay"
                     }`}
                   >
-                    {r}
+                    {roleLabels[r]?.split(" ")[0] || r}
                   </button>
                 ))}
               </div>
@@ -193,19 +205,19 @@ function RegisterPage() {
               className="w-full text-lg mt-2 font-bold"
             >
               {isLoading ? (
-                "Creating Account…"
+                t("common:loading")
               ) : (
                 <>
-                  <UserPlus size={20} /> CREATE ACCOUNT
+                  <UserPlus size={20} className="mr-2" /> {t("auth:registerButton")}
                 </>
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center text-sm text-cream/70">
-            Already have an account?{" "}
+            {t("auth:alreadyHaveAccount")}{" "}
             <Link to="/login" className="font-bold text-sun hover:underline">
-              Sign In
+              {t("common:signIn")}
             </Link>
           </div>
         </div>

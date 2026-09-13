@@ -5,11 +5,7 @@ import {
   ArrowLeft,
   Check,
   Plus,
-  Clock,
-  AlertCircle,
-  Sparkles,
   Trash2,
-  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatApiError } from "@/api/client";
@@ -26,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useTasks } from "@/hooks/use-tasks";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/context/LanguageContext";
 import type { TaskPriority } from "@/types/api";
 
 export const Route = createFileRoute("/routine")({
@@ -43,6 +40,7 @@ export const Route = createFileRoute("/routine")({
 
 function RoutinePage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { todayTasks, completeTask, createTask, deleteTask, isLoading } = useTasks();
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
 
@@ -87,7 +85,7 @@ function RoutinePage() {
         recurrence: "daily",
         start_date: new Date().toISOString().split("T")[0],
       });
-      toast.success("New routine activity added!");
+      toast.success(t("common:done"));
       setIsAddOpen(false);
       setTitle("");
       setDescription("");
@@ -101,10 +99,22 @@ function RoutinePage() {
   const handleDelete = async (taskId: string) => {
     try {
       await deleteTask(taskId);
-      toast.success("Activity removed.");
+      toast.success(t("common:done"));
     } catch (err: unknown) {
       toast.error(formatApiError(err, "Failed to remove activity"));
     }
+  };
+
+  const filterLabels: Record<string, string> = {
+    all: t("routine:allTasks"),
+    pending: t("routine:pending"),
+    completed: t("routine:completed"),
+  };
+
+  const priorityLabels: Record<string, string> = {
+    low: "Low",
+    normal: t("routine:normal"),
+    high: t("routine:high"),
   };
 
   return (
@@ -116,7 +126,7 @@ function RoutinePage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <Button asChild variant="cream" size="touch">
             <Link to="/">
-              <ArrowLeft size={20} className="mr-2" /> Back Home
+              <ArrowLeft size={20} className="mr-2" /> {t("common:backHome")}
             </Link>
           </Button>
 
@@ -124,20 +134,20 @@ function RoutinePage() {
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
               <Button variant="cream" size="touch" className="text-base font-extrabold">
-                <Plus size={20} className="mr-2" /> ADD ACTIVITY
+                <Plus size={20} className="mr-2" /> {t("routine:addTask")}
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-surface border-clay text-cream max-w-md">
               <DialogHeader>
                 <DialogTitle className="font-display text-2xl font-bold text-cream">
-                  Add Daily Activity
+                  {t("routine:addTaskDialogTitle")}
                 </DialogTitle>
               </DialogHeader>
 
               <form onSubmit={handleCreateTask} className="space-y-4 mt-4">
                 <div>
                   <Label htmlFor="task-title" className="text-sm font-bold text-cream">
-                    Activity Name
+                    {t("routine:taskTitle")}
                   </Label>
                   <Input
                     id="task-title"
@@ -151,7 +161,7 @@ function RoutinePage() {
 
                 <div>
                   <Label htmlFor="task-time" className="text-sm font-bold text-cream">
-                    Scheduled Time
+                    {t("routine:scheduledTime")}
                   </Label>
                   <Input
                     id="task-time"
@@ -165,7 +175,7 @@ function RoutinePage() {
 
                 <div>
                   <Label htmlFor="task-desc" className="text-sm font-bold text-cream">
-                    Notes / Description (Optional)
+                    {t("routine:description")}
                   </Label>
                   <Input
                     id="task-desc"
@@ -177,7 +187,9 @@ function RoutinePage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-bold text-cream mb-1 block">Priority Level</Label>
+                  <Label className="text-sm font-bold text-cream mb-1 block">
+                    {t("routine:priority")}
+                  </Label>
                   <div className="grid grid-cols-3 gap-2">
                     {(["low", "normal", "high"] as const).map((p) => (
                       <button
@@ -190,7 +202,7 @@ function RoutinePage() {
                             : "bg-ink border border-clay text-cream hover:bg-clay"
                         }`}
                       >
-                        {p}
+                        {priorityLabels[p] || p}
                       </button>
                     ))}
                   </div>
@@ -203,10 +215,10 @@ function RoutinePage() {
                     onClick={() => setIsAddOpen(false)}
                     className="border border-clay text-cream"
                   >
-                    Cancel
+                    {t("common:cancel")}
                   </Button>
                   <Button type="submit" variant="cream" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving…" : "Save Activity"}
+                    {isSubmitting ? t("common:loading") : t("routine:saveTask")}
                   </Button>
                 </div>
               </form>
@@ -223,10 +235,10 @@ function RoutinePage() {
               </span>
               <div>
                 <h1 className="font-display text-3xl sm:text-4xl font-bold text-cream">
-                  Today’s Routine
+                  {t("routine:pageTitle")}
                 </h1>
                 <p className="text-cream/80 mt-1">
-                  A steady, predictable routine creates calm and confidence.
+                  {t("routine:pageSubtitle")}
                 </p>
               </div>
             </div>
@@ -242,7 +254,7 @@ function RoutinePage() {
                     filter === f ? "bg-sun text-ink shadow-sm" : "text-cream hover:bg-clay"
                   }`}
                 >
-                  {f}
+                  {filterLabels[f] || f}
                 </button>
               ))}
             </div>
@@ -252,16 +264,13 @@ function RoutinePage() {
         {/* Task List */}
         <div className="space-y-4">
           {isLoading ? (
-            <div className="py-12 text-center text-cream/70 text-lg">Loading daily routine…</div>
+            <div className="py-12 text-center text-cream/70 text-lg">{t("common:loading")}</div>
           ) : filteredTasks.length === 0 ? (
             <div className="rounded-2xl border border-clay bg-surface p-12 text-center text-cream/70">
               <CalendarDays size={48} className="mx-auto text-sun/40 mb-4" />
               <h2 className="font-display text-2xl font-bold text-cream">
-                No activities match this view
+                {t("dashboard:noRoutineScheduled")}
               </h2>
-              <p className="text-cream/70 mt-2">
-                Click "Add Activity" above to schedule a routine.
-              </p>
             </div>
           ) : (
             filteredTasks.map((task) => {
@@ -312,7 +321,7 @@ function RoutinePage() {
                                 : "bg-sun/20 text-sun border border-sun/40"
                           }`}
                         >
-                          {task.priority}
+                          {priorityLabels[task.priority] || task.priority}
                         </span>
                       </div>
 
@@ -332,7 +341,7 @@ function RoutinePage() {
                       type="button"
                       onClick={() => handleDelete(task.id)}
                       className="size-10 flex items-center justify-center rounded-xl text-cream/60 hover:text-fire hover:bg-ink transition"
-                      title="Delete activity"
+                      title={t("common:delete")}
                     >
                       <Trash2 size={18} />
                     </button>

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Play, Clock, Star } from "lucide-react";
 import type { GameMetadata } from "../types/game.types";
 import { CATEGORY_LABELS, CATEGORY_COLORS, DOMAIN_LABELS } from "../types/game.types";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface GameCardProps {
   game: GameMetadata;
@@ -11,8 +12,19 @@ interface GameCardProps {
 }
 
 export function GameCard({ game, bestLevel, bestScore, lastPlayed }: GameCardProps) {
+  const { t, language } = useLanguage();
   const categoryStyle = CATEGORY_COLORS[game.category] ?? "bg-clay/30 text-cream/70 border-clay";
   const targetLevel = Math.min(game.maxLevel, (bestLevel !== undefined && bestLevel > 0) ? bestLevel + 1 : 1);
+
+  const categoryTranslationMap: Record<string, string> = {
+    memory: t("games:memoryRecall"),
+    logic: t("games:logicProblemSolving"),
+    attention: t("games:attentionFocus"),
+    speed: t("games:speedReaction"),
+    spatial: t("games:spatialVisual"),
+  };
+
+  const categoryText = categoryTranslationMap[game.category] || CATEGORY_LABELS[game.category];
 
   return (
     <Link
@@ -30,7 +42,7 @@ export function GameCard({ game, bestLevel, bestScore, lastPlayed }: GameCardPro
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase ${categoryStyle}`}
           >
-            {CATEGORY_LABELS[game.category]}
+            {categoryText}
           </span>
           {bestLevel !== undefined && bestLevel > 0 && (
             <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-tea-confirm/20 text-tea-confirm border border-tea-confirm/40 font-bold">
@@ -68,7 +80,7 @@ export function GameCard({ game, bestLevel, bestScore, lastPlayed }: GameCardPro
           </span>
           {lastPlayed && (
             <span>
-              {new Date(lastPlayed).toLocaleDateString("en-IN", {
+              {new Date(lastPlayed).toLocaleDateString(language || "en-IN", {
                 month: "short",
                 day: "numeric",
               })}
@@ -76,7 +88,7 @@ export function GameCard({ game, bestLevel, bestScore, lastPlayed }: GameCardPro
           )}
         </div>
         <span className="flex items-center gap-1.5 rounded-lg bg-sun px-3 py-1.5 text-xs font-extrabold text-ink group-hover:bg-sun/90 transition shrink-0">
-          <Play size={11} fill="currentColor" /> Play
+          <Play size={11} fill="currentColor" /> {t("games:playGame")}
         </span>
       </div>
     </Link>

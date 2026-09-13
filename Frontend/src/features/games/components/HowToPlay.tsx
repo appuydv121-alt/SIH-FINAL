@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface HowToPlayProps {
   title: string;
@@ -10,6 +11,7 @@ interface HowToPlayProps {
 
 export function HowToPlay({ title, instructions, tips, defaultOpen = false }: HowToPlayProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const { t } = useLanguage();
 
   return (
     <div className="rounded-2xl border border-clay bg-surface shadow-card">
@@ -23,7 +25,9 @@ export function HowToPlay({ title, instructions, tips, defaultOpen = false }: Ho
           <span className="flex size-9 items-center justify-center rounded-xl bg-sun/20 text-sun">
             <HelpCircle size={20} />
           </span>
-          <span className="font-display text-lg font-bold text-cream">How to Play: {title}</span>
+          <span className="font-display text-lg font-bold text-cream">
+            {t("games:howToPlay")}: {title}
+          </span>
         </div>
         <span className="text-cream/60 shrink-0">
           {open ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -45,7 +49,7 @@ export function HowToPlay({ title, instructions, tips, defaultOpen = false }: Ho
 
           {tips && tips.length > 0 && (
             <div className="mt-5 rounded-xl border border-sun/30 bg-sun/10 px-4 py-3">
-              <p className="mb-2 text-xs font-extrabold uppercase text-sun">💡 Tips</p>
+              <p className="mb-2 text-xs font-extrabold uppercase text-sun">💡 {t("games:tips")}</p>
               <ul className="space-y-1">
                 {tips.map((tip, i) => (
                   <li key={i} className="text-sm text-cream/80 flex gap-2">

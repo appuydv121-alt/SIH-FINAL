@@ -7,6 +7,7 @@ import { HowToPlay } from "./HowToPlay";
 import { LevelSelector } from "./LevelSelector";
 import type { GameMetadata } from "../types/game.types";
 import { GAME_INSTRUCTIONS } from "../data/gameInstructions";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface GameShellProps {
   game: GameMetadata;
@@ -16,18 +17,9 @@ interface GameShellProps {
   showLevelSelector?: boolean;
 }
 
-/**
- * GameShell wraps every individual game route.
- * It provides:
- *  - SIH NavigationHeader
- *  - Back to Games hub button
- *  - Game title + icon
- *  - Optional level selector
- *  - Collapsible HowToPlay instructions
- *  - The game content area (children)
- */
 export function GameShell({ game, children, level, showLevelSelector = true }: GameShellProps) {
   const instructions = GAME_INSTRUCTIONS[game.id];
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -38,7 +30,7 @@ export function GameShell({ game, children, level, showLevelSelector = true }: G
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button asChild variant="cream" size="touch">
             <Link to="/games">
-              <ArrowLeft size={18} className="mr-2" /> All Games
+              <ArrowLeft size={18} className="mr-2" /> {t("common:allGames")}
             </Link>
           </Button>
 
@@ -63,7 +55,7 @@ export function GameShell({ game, children, level, showLevelSelector = true }: G
                 </span>
               ))}
               <span className="text-[10px] px-2 py-0.5 rounded-full border border-sun/40 bg-sun/10 text-sun font-semibold">
-                Level {level} / {game.maxLevel}
+                {t("games:level", { level, maxLevel: game.maxLevel })}
               </span>
             </div>
           </div>
